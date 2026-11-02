@@ -5,7 +5,7 @@ export function useApp() {
   const defaultLanguage = import.meta.env.VITE_DEFAULT_LANGUAGE
   const baseUrl = import.meta.env.VITE_API_BASE_URL
   const baseMode = import.meta.env.VITE_API_BASE_MODE
-  const modeBaseUrl = `${baseUrl}${baseMode}`
+  const modeBaseUrl = `${String(baseUrl).replace(/\/$/, "")}/${baseMode}`
 
   const mode = import.meta.env.MODE
   const isAdminDashboard = mode === Platform.ADMIN_DASHBOARD
