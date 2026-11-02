@@ -88,6 +88,10 @@ COPY --from=publish /app/publish .
 COPY --from=publish /app/migrations/efbundle /app/efbundle
 COPY --from=publish /app/migrations/efbundle-logs /app/efbundle-logs
 
+# Seed JSON files — BaseLookupSeeder resolves paths via CallerFilePath (/src/...).
+COPY ["LoadlyAggregator.Infrastructure/LoadlyAggregator.Infrastructure.csproj", "/src/LoadlyAggregator.Infrastructure/"]
+COPY ["LoadlyAggregator.Infrastructure/Data/Seeders/json/", "/src/LoadlyAggregator.Infrastructure/Data/Seeders/json/"]
+
 # Copy entrypoint script.
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
