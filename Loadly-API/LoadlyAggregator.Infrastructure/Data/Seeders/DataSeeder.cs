@@ -39,6 +39,7 @@ public class DataSeeder
             await new CompanySeeder(_context, _passwordHashingService).SeedAsync();
             await new DriverSeeder(_context, _passwordHashingService).SeedAsync();
             await new GeneralSettingsSeeder(_context, _configuration).SeedAsync();
+            await new DemoDataSeeder(_context, _passwordHashingService).SeedAsync();
             Console.WriteLine("\n✅ Database seeding completed successfully!");
         }
         catch (Exception ex)
