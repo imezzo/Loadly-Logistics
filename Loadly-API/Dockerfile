@@ -78,12 +78,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
 # tzdata: Africa/Cairo DST rules (Law 24/2023); curl for HEALTHCHECK.
-# Cache package indexes and archives between BuildKit builds. The mounted
-# directories are not committed to the final image layer.
-RUN --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists,sharing=locked \
-    --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
-    apt-get update \
-    && apt-get install -y --no-install-recommends tzdata curl
+# ponytail: plain apt on Railway (BuildKit cache mounts need cacheKey prefix there)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tzdata curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy published application and independently cached migration bundles.
 COPY --from=publish /app/publish .

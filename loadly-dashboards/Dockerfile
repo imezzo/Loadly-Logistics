@@ -16,5 +16,6 @@ RUN npm run build:admin
 FROM nginx:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/admin-dashboard /usr/share/nginx/html
-EXPOSE 80
+ENV PORT=8080
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
