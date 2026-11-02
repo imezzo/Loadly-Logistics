@@ -1,0 +1,215 @@
+# name: Build and Push Docker Image
+
+# on:
+#   push:
+#     branches: [ main, staging ]
+#   #   tags: [ 'v*' ]
+#   # pull_request:
+#   #   branches: [ main ]
+
+# jobs:
+#   build:
+#     name: Build & Push
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v4
+
+#     - name: Set up QEMU
+#       uses: docker/setup-qemu-action@v3
+
+#     - name: Set up Docker Buildx
+#       uses: docker/setup-buildx-action@v3
+
+#     - name: Log in to Docker Hub
+#       if: github.event_name != 'pull_request'
+#       uses: docker/login-action@v3
+#       with:
+#         username: ${{ secrets.DOCKER_HUB_USERNAME_LOADLY }}
+#         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN_LOADLY }}
+
+#     - name: Set environment variables for Production
+#       if: github.ref == 'refs/heads/main'
+#       env:
+#         ASPNETCORE_ENVIRONMENT: ${{ vars.ASPNETCORE_ENVIRONMENT_PROD || 'Production' }}
+#         ASPNETCORE_URLS: ${{ vars.ASPNETCORE_URLS || 'http://+:8080' }}
+#         DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_PROD }}
+#         DB_LOGS_CONNECTION_STRING: ${{ secrets.DB_LOGS_CONNECTION_PROD }}
+#         REDIS_CONNECTION_STRING: ${{ secrets.REDIS_CONNECTION_PROD }}
+#         JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY_PROD }}
+#         JWT_ISSUER: ${{ vars.JWT_ISSUER || 'LoadlyAggregator' }}
+#         JWT_AUDIENCE: ${{ vars.JWT_AUDIENCE || 'LoadlyAggregator' }}
+#         JWT_EXPIRATION_MINUTES: ${{ vars.JWT_EXPIRATION_MINUTES || '60' }}
+#         SMTP_HOST: ${{ vars.SMTP_HOST }}
+#         SMTP_PORT: ${{ vars.SMTP_PORT }}
+#         SMTP_USERNAME: ${{ vars.SMTP_USERNAME }}
+#         SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+#         SMTP_FROM_EMAIL: ${{ vars.SMTP_FROM_EMAIL }}
+#         SMTP_FROM_NAME: ${{ vars.SMTP_FROM_NAME }}
+#         SMTP_ENABLE_SSL: ${{ vars.SMTP_ENABLE_SSL || 'true' }}
+#         SMTP_USE_DEFAULT_CREDENTIALS: ${{ vars.SMTP_USE_DEFAULT_CREDENTIALS || 'false' }}
+#         SMS_PROVIDER: ${{ vars.SMS_PROVIDER || 'victory_link' }}
+#         AKEDLY_API_KEY: ${{ secrets.AKEDLY_API_KEY }}
+#         AKEDLY_PIPELINE_ID: ${{ secrets.AKEDLY_PIPELINE_ID }}
+#         AKEDLY_API_URL: ${{ vars.AKEDLY_API_URL || 'https://api.akedly.io/api/v1' }}
+#         VICTORY_LINK_USERNAME: ${{ secrets.VICTORY_LINK_USERNAME }}
+#         VICTORY_LINK_PASSWORD: ${{ secrets.VICTORY_LINK_PASSWORD }}
+#         VICTORY_LINK_SENDER_NAME: ${{ vars.VICTORY_LINK_SENDER_NAME || 'fuelin' }}
+#         VICTORY_LINK_API_URL: ${{ vars.VICTORY_LINK_API_URL || 'https://app.community-ads.com/SendSMSAPI/api/SMSSender/SendSMS' }}
+#         ULTRAMSG_TOKEN: ${{ secrets.ULTRAMSG_TOKEN }}
+#         ULTRAMSG_INSTANCE_ID: ${{ secrets.ULTRAMSG_INSTANCE_ID }}
+#         STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 'local' }}
+#         CDN_DOMAIN: ${{ vars.CDN_DOMAIN_PROD }}
+#         CDN_MAIN_FOLDER: ${{ vars.CDN_MAIN_FOLDER || 'loadly' }}
+#         STORAGE_PATH: ${{ vars.STORAGE_PATH || 'wwwroot/uploads' }}
+#         AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET_PROD }}
+#         AWS_REGION: ${{ vars.AWS_REGION }}
+#         AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+#         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+#         AWS_CDN_DOMAIN: ${{ vars.AWS_CDN_DOMAIN_PROD }}
+#         ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
+#         ROLLBAR_ENVIRONMENT: ${{ vars.ROLLBAR_ENVIRONMENT_PROD || 'production' }}
+#         LOG_LEVEL_DEFAULT: ${{ vars.LOG_LEVEL_DEFAULT || 'Warning' }}
+#         LOG_LEVEL_ASPNETCORE: ${{ vars.LOG_LEVEL_ASPNETCORE || 'Warning' }}
+#         ADMINURL: ${{ vars._ADMINURL_PROD || 'https://admin.loadly-eg.com' }}
+#         DRIVERURL: ${{ vars._DRIVERURL_PROD || 'https://company.loadly-eg.com' }}
+#         COMPANYURL: ${{ vars._COMPANYURL_PROD || 'https://app.loadly-eg.com' }}
+#         CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS_PROD || 'https://admin.loadly-eg.com,https://company.loadly-eg.com,https://app.loadly-eg.com' }}
+#       run: |
+#         # Replace placeholders in main appsettings.json for Production
+#         envsubst < LoadlyAggregator.API/appsettings.ci.json > LoadlyAggregator.API/appsettings.tmp
+#         rm -rf LoadlyAggregator.API/appsettings.json || true
+#         mv LoadlyAggregator.API/appsettings.tmp LoadlyAggregator.API/appsettings.json
+#         rm -rf LoadlyAggregator.API/appsettings.ci.json || true
+
+#     - name: Set environment variables for Staging
+#       if: github.ref == 'refs/heads/staging'
+#       env:
+#         ASPNETCORE_ENVIRONMENT: ${{ vars.ASPNETCORE_ENVIRONMENT_STAGING || 'Staging' }}
+#         ASPNETCORE_URLS: ${{ vars.ASPNETCORE_URLS || 'http://+:8080' }}
+#         DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STAGING }}
+#         DB_LOGS_CONNECTION_STRING: ${{ secrets.DB_LOGS_CONNECTION_STAGING }}
+#         REDIS_CONNECTION_STRING: ${{ secrets.REDIS_CONNECTION_STAGING }}
+#         JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY_STAGING }}
+#         JWT_ISSUER: ${{ vars.JWT_ISSUER || 'LoadlyAggregator' }}
+#         JWT_AUDIENCE: ${{ vars.JWT_AUDIENCE || 'LoadlyAggregator' }}
+#         JWT_EXPIRATION_MINUTES: ${{ vars.JWT_EXPIRATION_MINUTES || '60' }}
+#         SMTP_HOST: ${{ vars.SMTP_HOST_STAGING }}
+#         SMTP_PORT: ${{ vars.SMTP_PORT_STAGING }}
+#         SMTP_USERNAME: ${{ vars.SMTP_USERNAME_STAGING }}
+#         SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD_STAGING }}
+#         SMTP_FROM_EMAIL: ${{ vars.SMTP_FROM_EMAIL_STAGING }}
+#         SMTP_FROM_NAME: ${{ vars.SMTP_FROM_NAME_STAGING }}
+#         SMTP_ENABLE_SSL: ${{ vars.SMTP_ENABLE_SSL || 'true' }}
+#         SMTP_USE_DEFAULT_CREDENTIALS: ${{ vars.SMTP_USE_DEFAULT_CREDENTIALS || 'false' }}
+#         SMS_PROVIDER: ${{ vars.SMS_PROVIDER || 'victory_link' }}
+#         AKEDLY_API_KEY: ${{ secrets.AKEDLY_API_KEY_STAGING }}
+#         AKEDLY_PIPELINE_ID: ${{ secrets.AKEDLY_PIPELINE_ID_STAGING }}
+#         AKEDLY_API_URL: ${{ vars.AKEDLY_API_URL || 'https://api.akedly.io/api/v1' }}
+#         VICTORY_LINK_USERNAME: ${{ secrets.VICTORY_LINK_USERNAME_STAGING }}
+#         VICTORY_LINK_PASSWORD: ${{ secrets.VICTORY_LINK_PASSWORD_STAGING }}
+#         VICTORY_LINK_SENDER_NAME: ${{ vars.VICTORY_LINK_SENDER_NAME || 'fuelin' }}
+#         VICTORY_LINK_API_URL: ${{ vars.VICTORY_LINK_API_URL || 'https://app.community-ads.com/SendSMSAPI/api/SMSSender/SendSMS' }}
+#         ULTRAMSG_TOKEN: ${{ secrets.ULTRAMSG_TOKEN_STAGING }}
+#         ULTRAMSG_INSTANCE_ID: ${{ secrets.ULTRAMSG_INSTANCE_ID_STAGING }}
+#         STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 's3' }}
+#         CDN_DOMAIN: ${{ vars.CDN_DOMAIN_STAGING }}
+#         CDN_MAIN_FOLDER: ${{ vars.CDN_MAIN_FOLDER_STAGING || 'loadly-staging' }}
+#         STORAGE_PATH: ${{ vars.STORAGE_PATH || 'wwwroot/uploads' }}
+#         AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET_STAGING }}
+#         AWS_REGION: ${{ vars.AWS_REGION }}
+#         AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+#         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+#         AWS_CDN_DOMAIN: ${{ vars.AWS_CDN_DOMAIN_STAGING }}
+#         ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
+#         ROLLBAR_ENVIRONMENT: ${{ vars.ROLLBAR_ENVIRONMENT_STAGING || 'staging' }}
+#         LOG_LEVEL_DEFAULT: ${{ vars.LOG_LEVEL_DEFAULT || 'Information' }}
+#         LOG_LEVEL_ASPNETCORE: ${{ vars.LOG_LEVEL_ASPNETCORE || 'Warning' }}
+#         ADMINURL: ${{ vars._ADMINURL_STAGING || 'https://stg-admin.loadly-eg.com' }}
+#         DRIVERURL: ${{ vars._DRIVERURL_STAGING || 'https://stg-company.loadly-eg.com' }}
+#         COMPANYURL: ${{ vars._COMPANYURL_STAGING || 'https://stg-app.loadly-eg.com' }}
+#         CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS_STAGING || 'http://localhost:3000,http://stg-admin.loadly-eg.com,https://stg-admin.loadly-eg.com,http://stg-company.loadly-eg.com,https://stg-company.loadly-eg.com,http://stg-app.loadly-eg.com,https://stg-app.loadly-eg.com' }}
+#       run: |
+#         # Replace placeholders in main appsettings.json for Staging
+#         envsubst < LoadlyAggregator.API/appsettings.ci.json > LoadlyAggregator.API/appsettings.tmp
+#         rm -rf LoadlyAggregator.API/appsettings.json || true
+#         mv LoadlyAggregator.API/appsettings.tmp LoadlyAggregator.API/appsettings.json
+#         rm -rf LoadlyAggregator.API/appsettings.ci.json || true
+
+#     - name: Set image tag
+#       id: image_tag
+#       run: |
+#         BUILD_NUMBER=${{ github.run_number }}
+#         if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+#           echo "tag=loadlyeg/shayyal-api-agg:${BUILD_NUMBER}" >> $GITHUB_OUTPUT
+#         elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+#           echo "tag=loadlyeg/shayyal-stg-api-agg:${BUILD_NUMBER}" >> $GITHUB_OUTPUT
+#         fi
+
+#     - name: Build and push Docker image
+#       uses: docker/build-push-action@v5
+#       with:
+#         context: .
+#         push: ${{ github.event_name != 'pull_request' }}
+#         tags: ${{ steps.image_tag.outputs.tag }}
+#         cache-from: type=gha
+#         cache-to: type=gha,mode=max
+#         build-args: |
+#           BUILD_DATE=${{ github.event.head_commit.timestamp }}
+#           VCS_REF=${{ github.sha }}
+#           VERSION=${{ steps.image_tag.outputs.tag }}
+
+#   deploy-staging:
+#     name: Staging-Deploy
+#     environment: staging
+#     needs: build
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+
+#     steps:
+#       - name: Checkout Repository
+#         id: checkout_repository
+#         uses: actions/checkout@v4
+
+#       - name: Set up SSH agent
+#         uses: webfactory/ssh-agent@v0.9.0
+#         with:
+#           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_STAGING }}
+
+#       - name: SSH Connect & Execute Commands
+#         env:
+#           USER: ubuntu
+#           HOST: 52.213.113.57
+#         run: |
+#           ssh -o StrictHostKeyChecking=no ${USER}@${HOST} \
+#            "sudo su -c '/root/stg-loadly/deploy.sh api:${{ github.run_number }}'"
+
+#   deploy-main:
+#     name: Main-Deploy
+#     environment: main
+#     needs: build
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+#     steps:
+#       - name: Checkout Repository
+#         id: checkout_repository
+#         uses: actions/checkout@v4
+
+#       - name: Set up SSH agent
+#         uses: webfactory/ssh-agent@v0.9.0
+#         with:
+#           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_PRODUCTION }}
+
+#       - name: SSH Connect & Execute Commands
+#         env:
+#           USER: ubuntu
+#           HOST: 18.157.157.23
+#         run: |
+#           ssh -o StrictHostKeyChecking=no ${USER}@${HOST} \
+#            "cd /root/shayyal && \
+#            export IMAGE_TAG=${{ github.run_number }} && \
+#            docker-compose -f docker-compose.staging.yml down || true && \
+#            docker-compose -f docker-compose.staging.yml pull && \
+#            docker-compose -f docker-compose.staging.yml up -d"

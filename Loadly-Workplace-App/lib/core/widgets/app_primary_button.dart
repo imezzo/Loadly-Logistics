@@ -1,0 +1,46 @@
+import 'package:flutter/cupertino.dart';
+
+import '../theme/app_colors.dart';
+
+/// Primary button using the Main Color (#0F766E) from the design system.
+class AppPrimaryButton extends StatelessWidget {
+  const AppPrimaryButton({
+    super.key,
+    required this.onPressed,
+    this.child,
+    this.label,
+    this.loading = false,
+    this.padding,
+    this.minSize = kMinInteractiveDimensionCupertino,
+  }) : assert(child != null || label != null, 'Provide either child or label');
+
+  final VoidCallback? onPressed;
+  final Widget? child;
+  final String? label;
+  final bool loading;
+  final EdgeInsetsGeometry? padding;
+  final double minSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      borderRadius: BorderRadius.circular(50),
+      minimumSize: Size(minSize, minSize),
+      color: AppColors.mainBlue,
+      disabledColor: AppColors.mainBlue.withValues(alpha: 0.5),
+      onPressed: loading ? null : onPressed,
+      child: loading
+          ? const CupertinoActivityIndicator(color: AppColors.white)
+          : DefaultTextStyle(
+              style: const TextStyle(
+                color: AppColors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              child: child ?? Text(label!),
+            ),
+    );
+  }
+}

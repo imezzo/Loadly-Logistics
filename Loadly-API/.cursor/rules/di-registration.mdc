@@ -1,0 +1,45 @@
+---
+description: Register all new repositories, actions, services, and filter utilities in ServiceCollectionExtensions with the right lifetime
+globs: LoadlyAggregator.Infrastructure/Extensions/ServiceCollectionExtensions.cs,LoadlyAggregator.Infrastructure/Extensions/**/*.cs
+alwaysApply: false
+---
+
+# DI Registration
+
+All DI wiring lives in `LoadlyAggregator.Infrastructure/Extensions/ServiceCollectionExtensions.cs`. Register every new type you add; the codebase does not use assembly scanning for domain components.
+
+## What to register and how
+
+| Component                                       | Lifetime  | Interface vs concrete                         |
+|-------------------------------------------------|-----------|-----------------------------------------------|
+| Repositories                                    | Scoped    | `AddScoped<IXRepository, XRepository>()`      |
+| Domain Actions                                  | Scoped    | `AddScoped<CreateXAction>()` (concrete)       |
+| Filter utilities (`XFilterUtility`)             | Scoped    | `AddScoped<XFilterUtility>()` (concrete)      |
+| Domain services with an interface               | Scoped    | `AddScoped<IXService, XService>()`            |
+| Stateless strategy / builder / resolver helpers | Scoped    | concrete; or Transient if truly per-call      |
+| Options / configuration binders                 | Singleton | `services.Configure<XOptions>(...)`           |
+| `DbContext`, `IUnitOfWork`                      | Scoped    | already wired — don't duplicate               |
+
+Actions are registered by **concrete type** because controllers inject them by concrete type (no interface).
+
+## Example
+
+```csharp
+// Repository
+services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+
+// Actions
+services.AddScoped<CreateInvoiceAction>();
+services.AddScoped<ListInvoicesAction>();
+
+// Filter utility
+services.AddScoped<InvoicesFilterUtility>();
+```
+
+## Checklist when adding a new feature
+
+- [ ] Repository + its interface registered.
+- [ ] Each Action class registered.
+- [ ] Filter utility (if a List action was added) registered.
+- [ ] Any new validator does **not** need manual registration — FluentValidation is auto-discovered.
+- [ ] Lifetime matches dependencies (don't put a Singleton on top of a Scoped `DbContext`).

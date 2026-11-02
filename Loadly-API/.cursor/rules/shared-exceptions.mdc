@@ -1,0 +1,42 @@
+---
+description: Which Shared exception to throw and how to pass localized args — never throw raw Exception or return error strings
+globs: LoadlyAggregator.Domain/**/*.cs,LoadlyAggregator.Infrastructure/**/*.cs,LoadlyAggregator.API/**/*.cs
+alwaysApply: false
+---
+
+# Shared Exceptions
+
+All domain/infra failures are signalled via exceptions in `LoadlyAggregator.Shared.Exceptions`, which implement `ILocalizedException` (dotted key + args). The global middleware translates them into the right HTTP status + localized message.
+
+## When to throw what
+
+| Situation                                                 | Exception                   | HTTP |
+|-----------------------------------------------------------|-----------------------------|------|
+| Entity not found by id/criteria                           | `NotFoundException`         | 404  |
+| Business invariant / validation that FluentValidation can't express | `ValidationException` | 422  |
+| Authenticated user is forbidden to touch this resource    | `ForbiddenException`        | 403  |
+| No valid authenticated identity / expired token / bad creds | `UnauthorizedException`   | 401  |
+| Illegal/inconsistent state that isn't a user input error  | `LogicalException`          | 400  |
+| Rate limit / throttling                                   | `TooManyRequestsException`  | 429  |
+
+## How to throw
+
+Always pass a dotted i18n key that exists in both `Messages.en.json` and `Messages.ar.json`, with positional args:
+
+```csharp
+var admin = await _adminRepository.GetByIdAsync(id)
+    ?? throw new NotFoundException("admins.not_found_with_id", id);
+
+if (contract.Status != ContractStatus.APPROVED)
+    throw new ValidationException("contracts.must_be_approved_before_invoicing");
+
+if (!userBelongsToCompany)
+    throw new ForbiddenException("auth.cannot_access_other_company_resources");
+```
+
+## Anti-patterns
+
+- ❌ `throw new Exception("...")` or `throw new InvalidOperationException("...")` — not translated, wrong status code.
+- ❌ Returning an error envelope / `null` instead of throwing.
+- ❌ Hardcoded English strings in the exception message — the message **is** the i18n key.
+- ❌ Catching one of these in a controller and rewrapping — let the exception middleware handle it.

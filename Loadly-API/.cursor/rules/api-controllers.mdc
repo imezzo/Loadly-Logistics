@@ -1,0 +1,50 @@
+---
+description: Controller pattern — thin controllers, permission constants, Resource mapping
+globs: LoadlyAggregator.API/Controllers/**/*.cs
+alwaysApply: false
+---
+
+# API Controllers
+
+Controllers are **thin HTTP adapters**. They bind a `Request`, call its `FromRequest()`, invoke an `Action`, then map the result to a `Resource`.
+
+## Rules
+
+- Decorate with `[ApiController]`, `[Route("api/...")]`, `[Authorize]`.
+- Protect every endpoint with `[HasPermission(RequestClass.Permission)]` — read the permission string from the Request class constant, never hardcode it in the controller.
+- Inject domain Actions via constructor; no business logic, no `DbContext`, no repositories here.
+- For writes return `Ok(new { message = "feature.action_succeeded" })` with a dotted i18n key.
+- For reads return `Ok(ResourceType.FromDto(await _action.ExecuteAsync(...)))`.
+- For list endpoints use `.ToResourceCollection<TDto, TResource>(TResource.FromDto)`.
+- Throw via Shared exceptions (`NotFoundException`, `ValidationException`, ...) from the Action — don't try/catch in the controller.
+
+## Example (matches the real `InvoicesController`)
+
+```csharp
+[ApiController]
+[Route("api/admin/invoices")]
+[Authorize]
+public class InvoicesController(CreateInvoiceAction createInvoiceAction) : ControllerBase
+{
+    [HttpPost]
+    [HasPermission(CreateInvoiceRequest.Permission)]
+    public async Task<ActionResult> Create([FromBody] CreateInvoiceRequest request)
+    {
+        await createInvoiceAction.ExecuteAsync(request.FromRequest());
+        return Ok(new { message = "invoices.created_successfully" });
+    }
+
+    [HttpGet("{id:long}")]
+    [HasPermission(GetInvoiceRequest.Permission)]
+    public async Task<ActionResult<InvoiceResource>> Get(long id) =>
+        Ok(InvoiceResource.FromDto(
+            await _getInvoiceAction.ExecuteAsync(new GetInvoiceRequest { Id = id }.FromRequest())));
+}
+```
+
+## Anti-patterns
+
+- ❌ Business logic, EF queries, or `if`-chains inside the controller.
+- ❌ Hardcoded permission strings — use `RequestClass.Permission`.
+- ❌ Returning raw entities or anonymous shapes for success data — always use a `*Resource`.
+- ❌ Catching domain exceptions and rewrapping them.

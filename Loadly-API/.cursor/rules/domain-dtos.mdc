@@ -1,0 +1,37 @@
+---
+description: Domain DTOs — plain data, no behavior, no entity leakage, specific suffixes
+globs: LoadlyAggregator.Domain/**/DTOs/**/*.cs
+alwaysApply: false
+---
+
+# Domain DTOs
+
+DTOs are the stable contract between the API layer and Domain Actions. They are the only "input shapes" Actions should accept.
+
+## Rules
+
+- One file per DTO under `LoadlyAggregator.Domain/{Admin|Company|Driver|Contractor|Collector|Common}/DTOs/<Feature>/`.
+- Use the right suffix: `CreateXDto`, `UpdateXDto`, `XDto` (read model), `ListXDto` (list input/response), or `XResponse` for action outputs that aren't a plain DTO.
+- Members are **primitives, enums-as-int, other DTOs, or collections of those**. Never put an entity (`Admin`, `Invoice`, …) on a DTO.
+- No methods beyond trivial `public static TDto FromEntity(TEntity e)` factories when it keeps mapping close to the data.
+- No `[Required]`, no FluentValidation, no `HttpContext`. Validation is on the Request, not the DTO.
+- No references to `LoadlyAggregator.API` or `LoadlyAggregator.Infrastructure`.
+
+## Example
+
+```csharp
+public class CreateAdminDto
+{
+    public string FullName { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public int Status { get; set; }
+    public int MfaChannel { get; set; }
+    public List<long>? RoleIds { get; set; }
+}
+```
+
+## When to add a `XResponse` instead of reusing `XDto`
+
+Add a dedicated `XResponse` when an Action needs to return something that isn't the normal single-entity read shape — e.g. aggregate counts, paged results plus metadata, or a composite ("login response"). Otherwise reuse the existing `XDto`.

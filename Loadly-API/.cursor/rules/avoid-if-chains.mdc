@@ -1,0 +1,45 @@
+---
+description: Replace long if/else chains in services and actions with Strategy / Builder / Resolver / pattern matching
+globs: LoadlyAggregator.Domain/**/*.cs,LoadlyAggregator.Infrastructure/Services/**/*.cs
+alwaysApply: false
+---
+
+# Avoid If-Chains in Services & Actions
+
+The codebase deliberately eliminates branching in services via design patterns (see `Documentation/ARCHITECTURE.md` → "Service Refactoring Patterns"). New code must follow the same rules.
+
+## Signals you're drifting
+
+- More than ~2 `if` branches shaping the return value of a service method.
+- Repeated `if (user.Mfa)` / `if (channel == "sms")` / `if (lang == "ar")` style switches.
+- Guard clauses mixed with business branches in the same method.
+
+## Preferred alternatives
+
+| Pattern              | Use for                                                 | Project example                              |
+|----------------------|---------------------------------------------------------|----------------------------------------------|
+| Strategy + Factory   | Many implementations keyed by a value (channel, method) | `IMfaMethodStrategy` + strategy factory      |
+| Builder              | Composing an output step-by-step                        | `LoginResponseBuilder`, `ClaimsBuilder`      |
+| Resolver             | Chain of fallbacks (language → fallback language)       | `TranslationResolver`                        |
+| Validator helpers    | Multiple guard-style precondition checks                | `UserValidator.ValidateCredentials(...)`     |
+| Pattern matching     | Type-based or shape-based dispatch                      | `return entity is IEntity e ? e.Id : null;`  |
+
+## Example — before / after
+
+```csharp
+// ❌ Before
+if (admin == null) throw new UnauthorizedException("Invalid credentials");
+if (!_hash.Verify(password, admin.Password)) throw new UnauthorizedException("Invalid credentials");
+if (admin.Status != UserStatus.Active) throw new UnauthorizedException("Account not active");
+if (admin.Mfa) return BuildMfaResponse(admin);
+return BuildStandardResponse(admin);
+
+// ✅ After
+_authService.ValidateCredentials(admin, password);           // guards via validator
+return _loginResponseBuilder.ForUser(admin!, "admin").Build(); // branch via strategy
+```
+
+## Allowed exceptions
+
+- A single early-return guard clause is fine (`if (dto.RoleIds is null) return;`).
+- Pattern matching with 2–3 arms is preferred over new types; promote to Strategy once there are 3+ real branches with behavior.

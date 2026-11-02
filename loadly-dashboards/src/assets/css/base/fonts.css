@@ -1,0 +1,72 @@
+@font-face {
+  font-family: Manrope;
+  src: url('../../fonts/en/Manrope-Regular.woff2') format('woff2'),
+    url('../../fonts/en/Manrope-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Manrope;
+  src: url('../../fonts/en/Manrope-Medium.woff2') format('woff2'),
+    url('../../fonts/en/Manrope-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Manrope;
+  src: url('../../fonts/en/Manrope-SemiBold.woff2') format('woff2'),
+    url('../../fonts/en/Manrope-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Manrope;
+  src: url('../../fonts/en/Manrope-Bold.woff2') format('woff2'),
+    url('../../fonts/en/Manrope-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Arabic fonts */
+@font-face {
+  font-family: Cairo;
+  src: url('../../fonts/ar/Cairo-Regular.woff2') format('woff2'),
+    url('../../fonts/ar/Cairo-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Cairo;
+  src: url('../../fonts/ar/Cairo-Medium.woff2') format('woff2'),
+    url('../../fonts/ar/Cairo-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Cairo;
+  src: url('../../fonts/ar/Cairo-SemiBold.woff2') format('woff2'),
+    url('../../fonts/ar/Cairo-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Cairo;
+  src: url('../../fonts/ar/Cairo-Bold.woff2') format('woff2'),
+    url('../../fonts/ar/Cairo-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

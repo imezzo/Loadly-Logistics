@@ -1,0 +1,88 @@
+.btn-primary {
+  @apply h-11 px-2 md:px-6 py-3
+  flex items-center justify-center gap-1
+  rounded-2xl bg-primary
+  text-sm font-semibold text-white transition-colors
+  hover:bg-primary/90;
+}
+
+.btn-secondary {
+  @apply flex items-center justify-center gap-2
+  rounded-2xl px-6 py-3
+  text-sm font-semibold text-neutral-800
+  bg-black/15 transition-colors
+  hover:bg-black/30;
+}
+
+.btn-success {
+  @apply flex items-center justify-center gap-2
+  rounded-2xl px-6 py-3
+  text-sm font-semibold text-white
+  bg-success-500 transition-colors
+  hover:bg-success-500/90;
+}
+
+.btn-error {
+  @apply flex items-center justify-center gap-2
+  rounded-2xl px-6 py-3
+  text-sm font-semibold text-white
+  bg-error-600 transition-colors
+  hover:bg-error-600/90;
+}
+
+.btn-link {
+  @apply text-sm font-medium text-primary underline transition-colors
+  hover:text-primary/80;
+}
+
+/* Outline buttons */
+
+.btn-primary-outline {
+  @apply flex h-11 items-center justify-center gap-2 rounded-2xl border border-primary bg-white
+  px-6 py-3 text-sm font-semibold text-primary transition-colors
+  hover:bg-primary/5;
+}
+
+.btn-secondary-outline {
+  @apply rounded-2xl border border-neutral-500 bg-white px-4 py-3 text-sm font-medium
+  text-neutral-700 transition-colors
+  hover:bg-neutral-100;
+}
+
+.btn-info-outline {
+  @apply size-8 p-2
+  flex items-center justify-center
+  rounded-lg border border-neutral-500
+  bg-transparent text-neutral-600 transition-colors
+  hover:text-info-500 hover:border-info-500;
+}
+
+.btn-success-outline {
+  @apply rounded-2xl border border-green-600 bg-white px-4 py-3 text-sm font-medium text-green-600
+  transition-colors
+  hover:bg-green-600 hover:text-white;
+}
+
+.btn-error-outline {
+  @apply rounded-2xl border border-error-600 bg-white px-4 py-3 text-sm font-medium text-error-600
+  transition-colors
+  hover:bg-error-600 hover:text-white;
+}
+
+/* Action buttons */
+
+.btn-action-success {
+  @apply size-8 p-2
+  flex items-center justify-center
+  rounded-lg border border-neutral-500
+  bg-transparent text-neutral-600 transition-colors
+  hover:text-success-500 hover:border-success-500;
+}
+
+.btn-action-error {
+  @apply size-8 p-2
+  flex items-center justify-center
+  rounded-lg border border-neutral-500
+  bg-transparent text-neutral-600 transition-colors
+  hover:text-error-600 hover:border-error-600;
+}

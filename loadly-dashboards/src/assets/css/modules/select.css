@@ -1,0 +1,46 @@
+.select {
+  @apply relative;
+
+  .select-button {
+    @apply flex min-h-11 h-auto! py-1 w-full items-center justify-between gap-2
+      rounded-lg border border-neutral-500 bg-white px-4
+      text-sm text-neutral-800 transition-colors
+      hover:border-neutral-800
+      focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none;
+
+    &.is-open {
+      @apply border-primary ring-1 ring-primary;
+    }
+
+    &.disabled {
+      @apply bg-black/3 opacity-100;
+    }
+
+  }
+
+  &.select-button-phone {
+    @apply [&>.select-button]:h-full! xs:[&>.select-button]:rounded-e-none;
+  }
+
+  .select-dropdown {
+    @apply absolute z-50 mt-2 w-full overflow-hidden rounded-lg border border-neutral-500 bg-white shadow-lg;
+
+    &.is-upward {
+      @apply bottom-full mb-2 mt-0;
+    }
+
+    .select-options {
+      @apply max-h-60 overflow-y-auto relative wrap-anywhere;
+
+      .select-option {
+        @apply flex cursor-pointer items-center justify-between px-4 py-2.5
+          text-sm text-neutral-800 transition-colors
+          hover:bg-neutral-400;
+
+        &.is-selected {
+          @apply bg-info-50 text-primary;
+        }
+      }
+    }
+  }
+}

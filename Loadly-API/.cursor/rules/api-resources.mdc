@@ -1,0 +1,44 @@
+---
+description: Resource classes — static FromDto/FromResponse factory, pure mapping, no logic
+globs: LoadlyAggregator.API/Resources/**/*.cs
+alwaysApply: false
+---
+
+# API Resources
+
+A `Resource` is the **outbound** API shape, built from a Domain DTO/Response. It is the mirror of `Request` on the way out.
+
+## Rules
+
+- One `*Resource` per DTO. Properties use safe defaults (`= string.Empty`, `= new()`).
+- Expose a `public static TResource FromDto(TDto dto)` (or `FromResponse` when the Action returns a dedicated response). Signature is **static factory only** — no constructors with logic, no DI, no async.
+- Mapping is **pure**: no repository calls, no `HttpContext`, no translations. Translations/formatting are the controller/middleware's job via `ApiResponseService`.
+- Nested collections map through their own Resource's `FromDto`: `dto.Roles.Select(RoleResource.FromDto).ToList()`.
+- For paged lists, let the Action return a paged DTO and let the controller use `.ToResourceCollection<TDto, TResource>(TResource.FromDto)` — don't invent a bespoke `ListXResource` wrapper.
+
+## Example (shape mirrors `AdminResource`)
+
+```csharp
+public class AdminResource
+{
+    public long Id { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public int Status { get; set; }
+    public List<RoleResource> Roles { get; set; } = new();
+
+    public static AdminResource FromDto(AdminDto dto) => new()
+    {
+        Id = dto.Id,
+        FullName = dto.FullName,
+        Status = dto.Status,
+        Roles = dto.Roles.Select(RoleResource.FromDto).ToList()
+    };
+}
+```
+
+## Anti-patterns
+
+- ❌ Injecting services into a Resource.
+- ❌ Returning Domain entities (`Admin`, `Invoice`, …) directly from controllers instead of a Resource.
+- ❌ Mapping logic that reads from `HttpContext` or translation services.
+- ❌ Enum-to-string conversion inside Resources — return the raw `int` and let the client resolve via the Enums endpoint (how the rest of the project does it).

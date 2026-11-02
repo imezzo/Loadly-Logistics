@@ -1,0 +1,36 @@
+---
+description: EF Core migrations — never hand-edit, timestamp_PascalCase names, snake_case schema, no destructive edits
+globs: LoadlyAggregator.Infrastructure/Migrations/**/*.cs
+alwaysApply: false
+---
+
+# EF Core Migrations
+
+Migrations in this repo are **generated**, not hand-written. They follow the `yyyyMMddHHmmss_PascalCaseDescription.cs` naming convention and have a matching `*.Designer.cs` + `ApplicationDbContextModelSnapshot.cs` update.
+
+## Workflow
+
+1. Change the entity + its EF configuration under `Infrastructure/Data/Configurations/`.
+2. Generate the migration from the solution root:
+   ```bash
+   dotnet ef migrations add CreateXTable \
+     -p LoadlyAggregator.Infrastructure \
+     -s LoadlyAggregator.API
+   ```
+3. Review the generated `Up`/`Down` + Designer + snapshot — commit all three.
+4. Apply: `dotnet ef database update -p LoadlyAggregator.Infrastructure -s LoadlyAggregator.API`.
+
+## Rules
+
+- **Never edit a migration that is already merged / applied in any environment.** Add a new one that corrects or extends it (`AddPathToCompanyDocuments`, `RemoveUniqueConstraintFromContractNames`, …).
+- Migration file name = `yyyyMMddHHmmssDescription` (match the existing format in this folder). Keep the description PascalCase and intent-revealing.
+- Table and column names in the generated SQL are **snake_case / plural** (`admins`, `contract_destinations`, `deleted_at`) — set via `ToTable(...)` / `HasColumnName(...)` in the Configuration, not by renaming the entity property.
+- Every new table has `created_at`, `updated_at`, `deleted_at` (added automatically because entities derive from `BaseEntity`).
+- Prefer additive changes. For destructive changes (drop column/table), add a dedicated migration and coordinate with ops/seed data.
+- Don't put seed data in migrations — use the seeders under `Infrastructure/Data/Seeders/`.
+
+## Anti-patterns
+
+- ❌ Writing raw SQL in a migration unless the EF model API genuinely can't express it.
+- ❌ Hand-editing `ApplicationDbContextModelSnapshot.cs` outside of a `dotnet ef migrations add`.
+- ❌ Reusing an existing migration file by appending changes to its `Up` method.

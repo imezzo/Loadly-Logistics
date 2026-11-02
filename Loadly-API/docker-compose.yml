@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: loadly-api
+    ports:
+      - "5002:8080"
+      - "5003:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=my_db;Username=postgres;Password=123
+      - ConnectionStrings__LogsConnection=Host=host.docker.internal;Database=my_db_logs;Username=postgres;Password=123
+      - ConnectionStrings__Redis=host.docker.internal:6379
+      - Redis__ConnectionString=host.docker.internal:6379
+    volumes:
+      - ./LoadlyAggregator.API/wwwroot/uploads:/app/wwwroot/uploads
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+

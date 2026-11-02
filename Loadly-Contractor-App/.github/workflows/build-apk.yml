@@ -1,0 +1,349 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  actions: write
+
+# env:
+#   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    outputs:
+      app-version: ${{ steps.app-version.outputs.version }}
+    env:
+      APK_PATH: build/app/outputs/flutter-apk/app-release.apk
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      # CI: no daemon, reuse build cache, parallel workers
+      GRADLE_OPTS: >-
+        -Dorg.gradle.daemon=false
+        -Dorg.gradle.caching=true
+        -Dorg.gradle.parallel=true
+        -Dorg.gradle.configureondemand=true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read app version
+        id: app-version
+        run: |
+          # Flutter version: name+build  e.g. 1.0.2+7
+          VERSION=$(grep '^version:' pubspec.yaml | sed -E 's/version:[[:space:]]*//')
+          BUILD_NAME="${VERSION%%+*}"
+          BUILD_NUMBER="${VERSION##*+}"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build-name=$BUILD_NAME" >> "$GITHUB_OUTPUT"
+          echo "build-number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "App version: ${VERSION}"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-cleanup: on-success
+          cache-read-only: false
+
+      # Keep in sync with .fvmrc
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.2"
+          channel: stable
+          cache: true
+          pub-cache: true
+          pub-cache-key: >-
+            flutter-pub-:os:-3.47.2-${{ hashFiles('pubspec.lock') }}
+
+      - name: Cache Android SDK downloads
+        uses: actions/cache@v4
+        with:
+          # Only extras Flutter often downloads beyond the runner image
+          path: |
+            ${{ env.ANDROID_HOME }}/ndk
+            ${{ env.ANDROID_HOME }}/cmake
+          key: >-
+            android-sdk-${{ runner.os }}-36-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties', '.fvmrc') }}
+          restore-keys: |
+            android-sdk-${{ runner.os }}-36-
+            android-sdk-${{ runner.os }}-
+
+      - name: Cache Flutter build intermediates
+        uses: actions/cache@v4
+        with:
+          path: |
+            .dart_tool
+            android/.gradle
+            android/build
+            build
+          key: >-
+            flutter-build-${{ runner.os }}-3.47.2-${{ hashFiles('pubspec.lock', 'android/**/*.gradle*', 'android/**/gradle-wrapper.properties', '.fvmrc') }}-${{ hashFiles('lib/**', 'assets/**', 'l10n.yaml') }}
+          restore-keys: |
+            flutter-build-${{ runner.os }}-3.47.2-${{ hashFiles('pubspec.lock', 'android/**/*.gradle*', 'android/**/gradle-wrapper.properties', '.fvmrc') }}-
+            flutter-build-${{ runner.os }}-3.47.2-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Configure release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ] || [ -z "$ANDROID_STORE_PASSWORD" ] || [ -z "$ANDROID_KEY_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ]; then
+            echo "Missing signing secrets. Need:"
+            echo "  ANDROID_KEYSTORE_BASE64, ANDROID_STORE_PASSWORD, ANDROID_KEY_PASSWORD, ANDROID_KEY_ALIAS"
+            exit 1
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          printf '%s\n' \
+            "storePassword=${ANDROID_STORE_PASSWORD}" \
+            "keyPassword=${ANDROID_KEY_PASSWORD}" \
+            "keyAlias=${ANDROID_KEY_ALIAS}" \
+            "storeFile=upload-keystore.jks" \
+            > android/key.properties
+
+      - name: Build release APK
+        run: >
+          flutter build apk --release
+          --build-name=${{ steps.app-version.outputs.build-name }}
+          --build-number=${{ steps.app-version.outputs.build-number }}
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ github.event.repository.name }}-${{ github.run_id }}
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 1
+
+  upload-and-notify:
+    needs: build-apk
+    runs-on: self-hosted
+    if: needs.build-apk.result == 'success'
+    outputs:
+      apk-url: ${{ steps.s3_upload.outputs.apk_url }}
+      apk-key: ${{ steps.s3_upload.outputs.apk_key }}
+    env:
+      APK_PATH: app-release.apk
+      AWS_REGION: eu-west-1
+      APP_VERSION: ${{ needs.build-apk.outputs.app-version }}
+
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ github.event.repository.name }}-${{ github.run_id }}
+          path: ./
+
+      - name: Upload APK to S3 and create share link
+        if: github.event_name != 'pull_request'
+        id: s3_upload
+        run: |
+          REPO_NAME=$(echo "${GITHUB_REPOSITORY#*/}" | tr '[:upper:]' '[:lower:]' | tr '-' '_')
+          APK_KEY="apk/${REPO_NAME}/${REPO_NAME}-${GITHUB_RUN_NUMBER}-${GITHUB_SHA::7}.apk"
+
+          # Upload using default credentials (EC2 IAM role on self-hosted)
+          aws s3 cp "$APK_PATH" "s3://${{ secrets.S3_BUCKET }}/$APK_KEY" --region $AWS_REGION
+
+          # Presigned URL — anyone with link can download for 7 days (no GitHub login)
+          APK_URL=$(aws s3 presign "s3://${{ secrets.S3_BUCKET }}/$APK_KEY" --expires-in 604800 --region $AWS_REGION --profile apk-presigner)
+
+          echo "apk_key=$APK_KEY" >> "$GITHUB_OUTPUT"
+          {
+            echo "apk_url<<EOF"
+            echo "$APK_URL"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          # Job outputs redact AWS-looking substrings; pass URL via artifact instead.
+          printf '%s' "$APK_URL" > apk-url.txt
+          printf '%s' "$APK_KEY" > apk-key.txt
+
+          {
+            echo "### APK uploaded to S3"
+            echo "- S3 key: \`$APK_KEY\`"
+            echo "- Presigned URL (7 days): $APK_URL"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload APK link for Teams
+        if: github.event_name != 'pull_request' && steps.s3_upload.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: apk-teams-link-${{ github.run_id }}
+          path: |
+            apk-url.txt
+            apk-key.txt
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Delete APK artifact
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/artifacts \
+            --jq '.artifacts[] | select(.name == "${{ github.event.repository.name }}-${{ github.run_id }}") | .id' | \
+            xargs -I{} gh api --method DELETE repos/${{ github.repository }}/actions/artifacts/{}
+
+  Notify-teams:
+    name: Notify Teams
+    needs: [build-apk, upload-and-notify]
+    if: needs.upload-and-notify.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK link
+        uses: actions/download-artifact@v7
+        with:
+          name: apk-teams-link-${{ github.run_id }}
+          path: ./apk-link
+
+      - name: Post APK upload to Teams
+        env:
+          WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          APP_VERSION: ${{ needs.build-apk.outputs.app-version }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "TEAMS_WEBHOOK_URL empty — skip notify"
+            exit 0
+          fi
+
+          APK_URL=$(cat ./apk-link/apk-url.txt)
+          APK_KEY=$(cat ./apk-link/apk-key.txt)
+          if [ -z "$APK_URL" ]; then
+            echo "No APK URL — skip notify"
+            exit 0
+          fi
+
+          SHORT_SHA="${SHA:0:7}"
+          TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          TITLE="✅  Contractor Upload: Succeeded"
+          VERSION_LABEL="${APP_VERSION:-n/a}"
+
+          ACTIONS_JSON=$(jq -n \
+            --arg run_url "$RUN_URL" \
+            --arg apk_url "$APK_URL" \
+            '[
+              {
+                "type": "Action.OpenUrl",
+                "title": "📥  Download APK (7 days)",
+                "url": $apk_url,
+                "style": "positive"
+              },
+              {
+                "type": "Action.OpenUrl",
+                "title": "🔗  View workflow run",
+                "url": $run_url
+              }
+            ]')
+
+          FACTS_JSON=$(jq -n \
+            --arg branch "$REF_NAME" \
+            --arg commit "$SHORT_SHA" \
+            --arg actor "$ACTOR" \
+            --arg run "#${RUN_NUMBER}" \
+            --arg version "$VERSION_LABEL" \
+            --arg key "$APK_KEY" \
+            --arg apk_url "$APK_URL" \
+            '[
+              {"title": "App version", "value": $version},
+              {"title": "Branch", "value": $branch},
+              {"title": "Commit", "value": $commit},
+              {"title": "Triggered by", "value": $actor},
+              {"title": "Run", "value": $run},
+              {"title": "S3 key", "value": $key},
+              {"title": "APK URL", "value": $apk_url}
+            ]')
+
+          PAYLOAD=$(jq -n \
+            --arg title "$TITLE" \
+            --arg repo "$REPO" \
+            --arg time "$TIME" \
+            --argjson facts "$FACTS_JSON" \
+            --argjson actions "$ACTIONS_JSON" \
+            '{
+              "type": "message",
+              "attachments": [{
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "contentUrl": null,
+                "content": {
+                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "type": "AdaptiveCard",
+                  "version": "1.4",
+                  "msteams": { "width": "Full" },
+                  "body": [
+                    {
+                      "type": "Container",
+                      "style": "good",
+                      "bleed": true,
+                      "items": [
+                        {
+                          "type": "TextBlock",
+                          "text": $title,
+                          "weight": "Bolder",
+                          "size": "Large",
+                          "wrap": true,
+                          "color": "Light"
+                        },
+                        {
+                          "type": "TextBlock",
+                          "text": $repo,
+                          "size": "Medium",
+                          "weight": "Bolder",
+                          "wrap": true,
+                          "spacing": "Small",
+                          "color": "Light"
+                        },
+                        {
+                          "type": "TextBlock",
+                          "text": $time,
+                          "size": "Small",
+                          "isSubtle": true,
+                          "spacing": "None",
+                          "color": "Light"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Container",
+                      "spacing": "Medium",
+                      "items": [
+                        {
+                          "type": "FactSet",
+                          "spacing": "Medium",
+                          "facts": $facts
+                        }
+                      ]
+                    }
+                  ],
+                  "actions": $actions
+                }
+              }]
+            }')
+
+          curl --fail --silent --show-error \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$WEBHOOK_URL"
+          echo "Teams notify sent: ${TITLE}"

@@ -1,0 +1,26 @@
+.input {
+  @apply flex w-full flex-col gap-1.5;
+
+  .input-container {
+    @apply flex items-center gap-2
+    w-full h-11 p-3
+    rounded-lg border border-gray-50 bg-white
+    focus-within:ring-1 focus-within:ring-primary;
+
+    &.disabled {
+      @apply bg-black/3;
+    }
+
+    input {
+      @apply w-full outline-none;
+    }
+  }
+
+  &.input-error .input-container {
+    @apply border-error-600 focus-within:ring-error-600;
+  }
+
+  .hint {
+    @apply text-gray-300;
+  }
+}

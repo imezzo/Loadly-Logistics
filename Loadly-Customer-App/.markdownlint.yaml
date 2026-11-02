@@ -1,0 +1,5 @@
+# Disable rules that are too strict for documentation
+# MD013: Line length 80 is restrictive for tables and URLs
+# MD060: Table column alignment varies by content
+MD013: false
+MD060: false

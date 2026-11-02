@@ -1,0 +1,70 @@
+---
+description: Loadly Aggregator – project layout, Clean Architecture flow, and index of per-topic rules
+alwaysApply: true
+---
+
+# Loadly Aggregator – Architecture Index
+
+High-level map of the solution. Detailed conventions live in the per-topic rules linked at the bottom and in `Documentation/ARCHITECTURE.md` + `Documentation/CRUD_OPERATIONS_GUIDE.md`.
+
+## Projects
+
+- **LoadlyAggregator.API** — Controllers, Requests, Resources, Validators, Middleware, Filters, Mappings, ModelBinders. No business logic.
+- **LoadlyAggregator.Domain** — Entities, DTOs, Actions, Interfaces, Enums, BaseClasses. Business logic only; no refs to API or Infrastructure.
+- **LoadlyAggregator.Infrastructure** — Repositories, DbContext, EF Configurations, Migrations, `Filters/` (`BaseFilterUtility`), concrete services (Auth, Notification, Media, Translation, Permissions, Queue, Sms, Ocr, Lookups, …).
+- **LoadlyAggregator.Shared** — `Api/`, `Constants/`, `DTOs/`, `Enums/`, `Exceptions/`, `Resources/`, `Time/`, `Utilities/`. Referenced by all layers.
+- **Tests/Unit/LoadlyAggregator.Domain.Tests** — unit tests for Domain Actions.
+
+Dependency direction: **API → Domain ← Infrastructure**; Shared used by all. Domain must not depend on API or Infrastructure.
+
+## Domain modules
+
+`Domain/`, `API/Controllers/`, `API/Requests/`, `API/Resources/` are all organized by audience: **Admin, Collector, Common, Company, Contractor, Driver**. `Common/` holds cross-cutting entities, base classes, interfaces, and shared actions.
+
+## Request → DTO → Action → Resource flow
+
+1. **Request** (API, `Requests/{Module}/…`) — HTTP binding + FluentValidation. Exposes `FromRequest()` → Domain DTO. See `api-requests`.
+2. **DTO** (Domain, `{Module}/DTOs/`) — input/output shape for Actions. See `domain-dtos`.
+3. **Action** (Domain, `{Module}/Actions/`) — business logic. Implements `IAction<TRequest, TResponse>`, `IAction<TResponse>` (no input), or takes a DTO and returns `Task` for void. See `domain-actions`, `avoid-if-chains`.
+4. **Resource** (API, `Resources/{Module}/…`) — API shape via static `FromDto(dto)` / `FromResponse(response)`. See `api-resources`.
+
+Thin controller:
+
+```csharp
+[HttpPost]
+[HasPermission("create_admin")]
+public async Task<ActionResult> Create([FromBody] CreateAdminRequest request)
+{
+    await _createAdminAction.ExecuteAsync(request.FromRequest());
+    return Ok(new { message = "admins.created_successfully" });
+}
+```
+
+Success-with-data returns a Resource. Success-with-message uses `Ok(new { message = "key.path" })`. `ApiResponse<T>` wrapping is only used by Auth endpoints today — do not adopt it elsewhere without a specific reason. See `api-controllers`.
+
+## C# style (matches `.editorconfig`)
+
+- **File-scoped namespaces**; namespace matches folder.
+- 4-space indent, no tabs; braces on their own line for types/methods/control flow.
+- Explicit types everywhere; `var` is banned in new code except for LINQ anonymous-type projections — see `no-var-in-new-code`.
+- Prefer pattern matching and switch expressions over `is`+cast or `as`+null check.
+- Explicit accessibility on everything; `I` prefix for interfaces; PascalCase for types/members.
+- `using` directives outside the namespace; `System.*` first.
+
+## Where to go next
+
+| Topic | Rule / Doc |
+|---|---|
+| Controllers, routes, `[HasPermission]` | `api-controllers`, `authorization` |
+| HTTP request binding + `FromRequest()` | `api-requests` |
+| Response shaping | `api-resources` |
+| FluentValidation | `api-validators` |
+| Domain actions + Strategy/Builder/Resolver | `domain-actions`, `avoid-if-chains` |
+| Domain DTOs | `domain-dtos` |
+| Entities, `BaseEntity`, soft delete (`Remove()`, `includeDeleted`) | `domain-entities` |
+| Repositories, `IUnitOfWork` | `infra-repositories` |
+| List endpoints + `BaseFilterUtility` (lives in `Infrastructure/Filters/`) | `list-filtering`, `Documentation/FILTER_UTILITY_PATTERN.md` |
+| Shared exceptions — `ValidationException`, `NotFoundException`, `UnauthorizedException`, `ForbiddenException`, `LogicalException`, `TooManyRequestsException` (all implement `ILocalizedException`) | `shared-exceptions` |
+| EF Core migrations | `ef-migrations` |
+| DI registration | `di-registration` |
+| Localization keys / messages | `localization-messages` |

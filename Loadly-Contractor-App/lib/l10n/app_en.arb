@@ -1,0 +1,1524 @@
+{
+  "@@locale": "en",
+  "appTitle": "Loadly Contractor",
+  "@appTitle": {
+    "description": "Application title shown in app bar"
+  },
+  "welcome": "Welcome",
+  "@welcome": {
+    "description": "Welcome greeting on login screen"
+  },
+  "welcomeToLoadly": "Welcome to Loadly",
+  "welcomeDesc": "Sign in to your account or create a new one",
+  "switchLanguage": "Switch language",
+  "createAccount": "Create account",
+  "createNewAccount": "Create new account",
+  "verificationInstruction": "Enter your phone number and we will send you a verification code",
+  "@verificationInstruction": {
+    "description": "Instruction for phone verification"
+  },
+  "phone": "Phone number",
+  "@phone": {
+    "description": "Phone number field label"
+  },
+  "enterYourPhone": "Enter your phone number",
+  "@enterYourPhone": {
+    "description": "Phone input placeholder"
+  },
+  "enterYourFullName": "Enter your full name",
+  "@enterYourFullName": {
+    "description": "full name placeholder"
+  },
+  "enterYourAddress": "Enter your address details",
+  "@enterYourAddress": {
+    "description": "address details placeholder"
+  },
+  "enterValidPhone": "Enter a valid phone number",
+  "@enterValidPhone": {
+    "description": "Phone validation error"
+  },
+  "enterValidPhone11Digits": "Enter 11 digits",
+  "@enterValidPhone11Digits": {
+    "description": "Phone length validation error"
+  },
+  "enterValidPhone01": "Phone number must start with 01",
+  "@enterValidPhone01": {
+    "description": "Phone format validation error"
+  },
+   "enterYourId": "National ID Number",
+  "@enterYourId": {
+    "description": "National ID Number"
+  },
+  "signInToAccount": "Sign in to your account",
+  "@signInToAccount": {
+    "description": "Sign in screen title"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "signIn": "Sign in",
+  "@signIn": {
+    "description": "Sign in button label"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error dialog title"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "OK button label"
+  },
+  "enterYourEmail": "Enter your email",
+  "@enterYourEmail": {
+    "description": "Email input placeholder"
+  },
+  "enterValidEmail": "Enter a valid email",
+  "@enterValidEmail": {
+    "description": "Email validation error"
+  },
+  "enterYourPassword": "Enter your password",
+  "@enterYourPassword": {
+    "description": "Password input placeholder"
+  },
+  "home": "Home",
+  "@home": {
+    "description": "Home tab label"
+  },
+  "forgetPassword": "Forgot your password?",
+  "@forgetPassword": {
+    "description": "Forgot password link"
+  },
+  "verificationTitle": "Verification Code",
+  "@verificationTitle": {
+    "description": "Verification screen title"
+  },
+  "verificationSubtitle": "We will send you a verification code, you can choose to send it to your email or as a text message to your mobile?",
+  "@verificationSubtitle": {
+    "description": "Verification method selection prompt"
+  },
+  "verificationSubtitlePhone": "We will send you a verification code via text message to your phone.",
+  "@verificationSubtitlePhone": {
+    "description": "SMS verification description"
+  },
+  "sendViaSms": "Send code via text message",
+  "@sendViaSms": {
+    "description": "SMS verification option"
+  },
+  "sendViaEmail": "Send code via email",
+  "@sendViaEmail": {
+    "description": "Email verification option"
+  },
+  "continueButton": "Log In",
+  "@continueButton": {
+    "description": "Continue/Log in button"
+  },
+  "otpInstructionSms": "We sent you a verification code via text message to your number ({phone}), enter it here to complete your account activation.",
+  "@otpInstructionSms": {
+    "description": "OTP instruction when code was sent via SMS",
+    "placeholders": {
+      "phone": {
+        "type": "String",
+        "example": "01234567890"
+      }
+    }
+  },
+  "otpInstructionEmail": "We sent you a verification code via email to {email}, enter it here to complete your account activation.",
+  "@otpInstructionEmail": {
+    "description": "OTP instruction when code was sent via email",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "user@example.com"
+      }
+    }
+  },
+  "resendPrompt": "Didn't receive a message yet?",
+  "@resendPrompt": {
+    "description": "Resend code prompt"
+  },
+  "resendLink": "Send again",
+  "@resendLink": {
+    "description": "Resend code link"
+  },
+  "verifyAccount": "Verify Account",
+  "@verifyAccount": {
+    "description": "Verify account button"
+  },
+  "verifyEmail": "Verify Email",
+  "@verifyEmail": {
+    "description": "Verify email screen title"
+  },
+  "verifyEmailInstruction": "Enter the 6-digit code we sent to your email to verify your account.",
+  "@verifyEmailInstruction": {
+    "description": "Email verification instruction"
+  },
+  "enterVerificationCode": "Enter the verification code",
+  "@enterVerificationCode": {
+    "description": "Verification code input placeholder"
+  },
+  "verificationCodeLength": "Code must be 6 digits",
+  "@verificationCodeLength": {
+    "description": "Verification code length validation"
+  },
+  "verify": "Verify",
+  "@verify": {
+    "description": "Verify button"
+  },
+  "resendCode": "Resend code",
+  "@resendCode": {
+    "description": "Resend code button"
+  },
+  "codeSentToEmail": "Verification code sent to your email.",
+  "@codeSentToEmail": {
+    "description": "Code sent confirmation message"
+  },
+  "newPassword": "New password",
+  "@newPassword": {
+    "description": "New password field label"
+  },
+  "confirmPassword": "Confirm password",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "resetPassword": "Reset password",
+  "@resetPassword": {
+    "description": "Reset password button"
+  },
+  "passwordMinLength": "Password must be at least 6 characters",
+  "@passwordMinLength": {
+    "description": "Password length validation"
+  },
+  "personalAccount": "Personal Account",
+  "@personalAccount": {
+    "description": "Personal account section title"
+  },
+  "employeeDriverName": "Employee/Driver Name",
+  "@employeeDriverName": {
+    "description": "Employee or driver name label"
+  },
+  "emailLabel": "Email",
+  "@emailLabel": {
+    "description": "Email label in profile"
+  },
+  "rating": "Rating",
+  "@rating": {
+    "description": "Driver rating label"
+  },
+  "trip": "Trip",
+  "@trip": {
+    "description": "Single trip label"
+  },
+  "trips": "Trips",
+  "@trips": {
+    "description": "Trips list label"
+  },
+  "files": "Files",
+  "@files": {
+    "description": "Files tab label"
+  },
+  "myPersonalData": "My Personal Data",
+  "@myPersonalData": {
+    "description": "Personal data section"
+  },
+  "fileName": "File Name",
+  "@fileName": {
+    "description": "File name field label"
+  },
+  "chooseFromGallery": "Choose from Gallery",
+  "@chooseFromGallery": {
+    "description": "Gallery picker option"
+  },
+  "profilePage": "Profile Page",
+  "@profilePage": {
+    "description": "Profile page title"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications tab label"
+  },
+  "tripsNav": "Trips",
+  "@tripsNav": {
+    "description": "Trips navigation label"
+  },
+  "homeNav": "Home",
+  "@homeNav": {
+    "description": "Home navigation label"
+  },
+  "secondsRemaining": "{seconds} seconds remaining",
+  "@secondsRemaining": {
+    "description": "Countdown seconds remaining",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "loginWithPassword": "Login with password",
+  "@loginWithPassword": {
+    "description": "Password login option"
+  },
+  "loginWithBiometric": "Login with Biometric",
+  "@loginWithBiometric": {
+    "description": "Biometric login option"
+  },
+  "or": "OR",
+  "@or": {
+    "description": "Divider between options"
+  },
+  "backToLogin": "Back to login",
+  "@backToLogin": {
+    "description": "Back to login link"
+  },
+  "rememberMe": "Remember me",
+  "@rememberMe": {
+    "description": "Remember me checkbox"
+  },
+  "online": "Online",
+  "@online": {
+    "description": "Online status"
+  },
+  "offline": "Offline",
+  "@offline": {
+    "description": "Offline status"
+  },
+  "active": "Active",
+  "@active": {
+    "description": "Generic active status"
+  },
+  "inactive": "Inactive",
+  "@inactive": {
+    "description": "Generic inactive status"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button"
+  },
+  "changePassword": "Change Password",
+  "@changePassword": {
+    "description": "Change password option"
+  },
+  "enableFingerprint": "Enable Fingerprint",
+  "@enableFingerprint": {
+    "description": "Enable fingerprint option"
+  },
+  "biometricErrorFailedOrCancelled": "Biometric authentication failed or cancelled.",
+  "@biometricErrorFailedOrCancelled": {
+    "description": "Error when fingerprint login fails or user cancels"
+  },
+  "biometricErrorEnableFailed": "Failed to enable biometric login.",
+  "@biometricErrorEnableFailed": {
+    "description": "Error when enabling fingerprint login fails"
+  },
+  "biometricErrorDisableFailed": "Failed to disable biometric login.",
+  "@biometricErrorDisableFailed": {
+    "description": "Error when disabling fingerprint login fails"
+  },
+  "biometricLocalizedReasonSignIn": "Authenticate to sign in",
+  "@biometricLocalizedReasonSignIn": {
+    "description": "System biometric prompt when logging in with fingerprint/Face ID"
+  },
+  "biometricLocalizedReasonEnable": "Authenticate to enable fingerprint login",
+  "@biometricLocalizedReasonEnable": {
+    "description": "System biometric prompt when enabling fingerprint login"
+  },
+  "biometricEnablePasswordDialogMessage": "Enter your password to enable fingerprint login.",
+  "@biometricEnablePasswordDialogMessage": {
+    "description": "Body text in password dialog before enabling fingerprint"
+  },
+  "biometricOfferAfterLoginMessage": "Would you like to enable fingerprint login for faster access?",
+  "@biometricOfferAfterLoginMessage": {
+    "description": "Prompt after password login to offer enabling fingerprint"
+  },
+  "biometricAccountInfoUnavailable": "Could not get your account info. Please try again.",
+  "@biometricAccountInfoUnavailable": {
+    "description": "Error when profile login is missing for fingerprint enable"
+  },
+  "enable2FA": "Enable 2FA",
+  "@enable2FA": {
+    "description": "Enable two-factor authentication"
+  },
+  "support": "Support",
+  "@support": {
+    "description": "Support section"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings title"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Password mismatch validation"
+  },
+  "fullNameEnglish": "Full Name (English)",
+  "@fullNameEnglish": {
+    "description": "Full name in English field"
+  },
+  "fullNameArabic": "Full Name (Arabic)",
+  "@fullNameArabic": {
+    "description": "Full name in Arabic field"
+  },
+  "userName": "User Name",
+  "@userName": {
+    "description": "Username field label"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+  "editProfile": "Edit Profile",
+  "@editProfile": {
+    "description": "Edit profile button to unlock personal data for editing"
+  },
+  "profileUpdatedSuccessfully": "Profile updated successfully",
+  "@profileUpdatedSuccessfully": {
+    "description": "Profile update success message"
+  },
+  "imagePickerNotImplemented": "Image picker not implemented yet",
+  "@imagePickerNotImplemented": {
+    "description": "Image picker not available message"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button"
+  },
+  "user": "User",
+  "@user": {
+    "description": "Generic user label"
+  },
+  "cameraPermissionRequired": "Camera permission is required to take photos. Please enable it in Settings.",
+  "@cameraPermissionRequired": {
+    "description": "Camera permission request message"
+  },
+  "photoLibraryPermissionRequired": "Photo library permission is required to select photos. Please enable it in Settings.",
+  "@photoLibraryPermissionRequired": {
+    "description": "Photo library permission request message"
+  },
+  "permissionDenied": "Permission Denied",
+  "@permissionDenied": {
+    "description": "Permission denied dialog title"
+  },
+  "openSettings": "Open Settings",
+  "@openSettings": {
+    "description": "Open settings button"
+  },
+  "takePhoto": "Take Photo",
+  "@takePhoto": {
+    "description": "Take photo option"
+  },
+  "todayNotifications": "Today's Notifications",
+  "@todayNotifications": {
+    "description": "Today notifications section"
+  },
+  "company": "Company",
+  "@company": {
+    "description": "Company name label"
+  },
+  "companyNotification": "Company Notification",
+  "@companyNotification": {
+    "description": "Company notification label"
+  },
+  "newTripSent": "A new trip has been sent, click to view details",
+  "@newTripSent": {
+    "description": "New trip notification message"
+  },
+  "retrievalNotificationSent": "A retrieval notification has been sent to the company awaiting your reply",
+  "@retrievalNotificationSent": {
+    "description": "Retrieval notification message"
+  },
+  "replacementCarOnWay": "A replacement car is on its way to you",
+  "@replacementCarOnWay": {
+    "description": "Replacement car notification"
+  },
+  "vehicleDetails": "Vehicle Details",
+  "@vehicleDetails": {
+    "description": "Vehicle details section"
+  },
+  "minsAgo": "{mins} mins ago",
+  "@minsAgo": {
+    "description": "Time ago in minutes",
+    "placeholders": {
+      "mins": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "hoursAgo": "{hours} hours ago",
+  "@hoursAgo": {
+    "description": "Time ago in hours",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "tripDetails": "Trip Details",
+  "@tripDetails": {
+    "description": "Trip details screen title"
+  },
+  "tripId": "Trip ID",
+  "@tripId": {
+    "description": "Trip ID label"
+  },
+  "status": "Status",
+  "@status": {
+    "description": "Status label"
+  },
+  "statusRequested": "Requested",
+  "@statusRequested": {
+    "description": "Trip status: requested"
+  },
+  "statusPending": "Pending",
+  "@statusPending": {
+    "description": "Trip status: pending"
+  },
+  "statusScheduled": "Scheduled",
+  "@statusScheduled": {
+    "description": "Trip status: scheduled"
+  },
+  "statusDriverAccepted": "Driver Accepted",
+  "@statusDriverAccepted": {
+    "description": "Trip status: driver accepted"
+  },
+  "statusFirstPickupLoading": "Loading",
+  "@statusFirstPickupLoading": {
+    "description": "Trip status: first pickup loading"
+  },
+  "statusInProgress": "In Progress",
+  "@statusInProgress": {
+    "description": "Trip status: in progress"
+  },
+  "statusCompleted": "Completed",
+  "@statusCompleted": {
+    "description": "Trip status: completed"
+  },
+  "statusReviewed": "Reviewed",
+  "@statusReviewed": {
+    "description": "Trip status: reviewed"
+  },
+  "statusCancelled": "Cancelled",
+  "@statusCancelled": {
+    "description": "Trip status: cancelled"
+  },
+  "statusUnknown": "—",
+  "@statusUnknown": {
+    "description": "Trip status: unknown"
+  },
+  "startTrip": "Start Trip",
+  "@startTrip": {
+    "description": "Start trip button"
+  },
+  "startShippingAndLoading": "Start Shipping and Loading",
+  "@startShippingAndLoading": {
+    "description": "Start shipping button"
+  },
+  "tripStartsOn": "Trip starts on: {date} at {time}",
+  "@tripStartsOn": {
+    "description": "Trip start date and time",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "2025-03-08"
+      },
+      "time": {
+        "type": "String",
+        "example": "10:00 AM"
+      }
+    }
+  },
+  "startLoadingShipment": "Start loading shipment",
+  "@startLoadingShipment": {
+    "description": "Start loading shipment label"
+  },
+  "pickupLocation": "Pickup",
+  "@pickupLocation": {
+    "description": "Pickup label"
+  },
+  "startTripLocation": "Start Trip",
+  "@startTripLocation": {
+    "description": "Label for the first pickup when driver has departed from it"
+  },
+  "deliveryLocation": "Drop Off",
+  "@deliveryLocation": {
+    "description": "Drop off label"
+  },
+  "weight": "Weight",
+  "@weight": {
+    "description": "Weight label"
+  },
+  "shipmentType": "Shipment Type",
+  "@shipmentType": {
+    "description": "Shipment type label"
+  },
+  "tripDuration": "Trip Duration",
+  "@tripDuration": {
+    "description": "Trip duration label"
+  },
+  "shipmentDimensions": "Shipment Dimensions",
+  "@shipmentDimensions": {
+    "description": "Shipment dimensions label"
+  },
+  "approximately": "Approximately",
+  "@approximately": {
+    "description": "Approximate indicator"
+  },
+  "hours": "hours",
+  "@hours": {
+    "description": "Hours unit"
+  },
+  "stopPoints": "Stop Points",
+  "@stopPoints": {
+    "description": "Stop points section"
+  },
+  "tripPoints": "Trip Points",
+  "@tripPoints": {
+    "description": "Trip points section"
+  },
+  "stop": "Stop",
+  "@stop": {
+    "description": "Stop label"
+  },
+  "clientDetails": "Client Details",
+  "@clientDetails": {
+    "description": "Client details section"
+  },
+  "phoneNumber": "Phone Number",
+  "@phoneNumber": {
+    "description": "Phone number label"
+  },
+  "responsiblePersonName": "Contact Name",
+  "@responsiblePersonName": {
+    "description": "Responsible person label"
+  },
+  "isThereAProblemCallSupport": "Is there a problem? Call Support",
+  "@isThereAProblemCallSupport": {
+    "description": "Support contact prompt"
+  },
+  "clickToConfirm": "Click to Confirm",
+  "@clickToConfirm": {
+    "description": "Confirm action prompt"
+  },
+  "tripDetailsPlaceholder": "Details are written here",
+  "@tripDetailsPlaceholder": {
+    "description": "Trip details placeholder text"
+  },
+  "noTripsAvailable": "No trips available",
+  "@noTripsAvailable": {
+    "description": "Empty trips list message"
+  },
+  "noNotifications": "No notifications",
+  "@noNotifications": {
+    "description": "Empty notifications list message"
+  },
+  "noFilesAvailable": "No files available",
+  "@noFilesAvailable": {
+    "description": "Empty files list message in profile"
+  },
+  "loadingTrips": "Loading trips...",
+  "@loadingTrips": {
+    "description": "Trips loading indicator"
+  },
+  "errorLoadingTrips": "Error loading trips",
+  "@errorLoadingTrips": {
+    "description": "Trips loading error message"
+  },
+  "currentTripTab": "Current Trip",
+  "@currentTripTab": {
+    "description": "Current trip tab label"
+  },
+  "previousTripsTab": "Previous Trips",
+  "@previousTripsTab": {
+    "description": "Previous trips tab label"
+  },
+  "yourCurrentTrip": "Your Current Trip",
+  "@yourCurrentTrip": {
+    "description": "Your current trip section"
+  },
+  "yourPreviousTrips": "Your Previous Trips",
+  "@yourPreviousTrips": {
+    "description": "Your previous trips section"
+  },
+  "shipmentDetails": "Shipment Details",
+  "@shipmentDetails": {
+    "description": "Shipment details section"
+  },
+  "tripOnDayAtTime": "Trip on: {date} at {time}",
+  "@tripOnDayAtTime": {
+    "description": "Trip date and time display",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "2025-03-08"
+      },
+      "time": {
+        "type": "String",
+        "example": "10:00 AM"
+      }
+    }
+  },
+  "onTheWayToLoading": "On the way to loading",
+  "@onTheWayToLoading": {
+    "description": "On the way to loading status"
+  },
+  "tripScheduleUpdated": "Trip Schedule Updated",
+  "@tripScheduleUpdated": {
+    "description": "Trip schedule update title"
+  },
+  "tripScheduleUpdatedMessage": "Your trip schedule has been updated: {oldSchedule} to {newSchedule}",
+  "@tripScheduleUpdatedMessage": {
+    "description": "Trip schedule update notification message",
+    "placeholders": {
+      "oldSchedule": {
+        "type": "String",
+        "example": "Mar 8, 10:00 AM"
+      },
+      "newSchedule": {
+        "type": "String",
+        "example": "Mar 9, 2:00 PM"
+      }
+    }
+  },
+  "newSchedule": "New schedule",
+  "@newSchedule": {
+    "description": "New schedule label"
+  },
+  "acceptTrip": "Accept Trip",
+  "@acceptTrip": {
+    "description": "Accept trip button"
+  },
+  "arriveAtWaypoint": "I've Arrived",
+  "@arriveAtWaypoint": {
+    "description": "Arrive at waypoint button"
+  },
+  "departFromWaypoint": "Depart",
+  "@departFromWaypoint": {
+    "description": "Depart from waypoint button"
+  },
+  "completeLoading": "Complete Loading",
+  "@completeLoading": {
+    "description": "Complete loading button"
+  },
+  "startUnloading": "Start Unloading",
+  "@startUnloading": {
+    "description": "Start unloading button"
+  },
+  "completeUnloading": "Complete Unloading",
+  "@completeUnloading": {
+    "description": "Complete unloading button"
+  },
+  "optionalNotePlaceholder": "Optional note",
+  "@optionalNotePlaceholder": {
+    "description": "Placeholder for optional note when completing loading"
+  },
+  "completeTrip": "Complete Trip",
+  "@completeTrip": {
+    "description": "Complete trip button"
+  },
+  "openCameraForPhotos": "Open camera for taking photos",
+  "@openCameraForPhotos": {
+    "description": "Prompt to open camera for taking photos"
+  },
+  "openCamera": "Open camera",
+  "@openCamera": {
+    "description": "Open camera button"
+  },
+  "processing": "Processing...",
+  "@processing": {
+    "description": "Label shown while an action is being processed"
+  },
+  "shipmentPhotos": "Shipment Photos",
+  "@shipmentPhotos": {
+    "description": "Shipment photos section label"
+  },
+  "receiptNote": "Receipt Note",
+  "@receiptNote": {
+    "description": "Receipt note label"
+  },
+  "deliveryNote": "Delivery Note",
+  "@deliveryNote": {
+    "description": "Delivery note label"
+  },
+  "unloadingPhotos": "Unloading Photos",
+  "@unloadingPhotos": {
+    "description": "Unloading photos section label"
+  },
+  "tollgatePhotos": "Tollgate Photos",
+  "@tollgatePhotos": {
+    "description": "Tollgate photos section label"
+  },
+  "tollgatesTotalAmount": "Tollgates Total Amount",
+  "@tollgatesTotalAmount": {
+    "description": "Tollgates Total Amount section label"
+  },
+  "tollgatesWeightTotalAmount": "Tollgates Weight Total Amount",
+  "@tollgatesWeightTotalAmount": {
+    "description": "Tollgates weight total amount section label"
+  },
+  "tollgateWeightImages": "Tollgate Weight Images",
+  "@tollgateWeightImages": {
+    "description": "Tollgate weight images section label"
+  },
+  "notePlaceholder": "Note",
+  "@notePlaceholder": {
+    "description": "Note input placeholder"
+  },
+  "noteRequired": "Note is required",
+  "@noteRequired": {
+    "description": "Note required validation error"
+  },
+  "tripPointNoNote": "No note",
+  "@tripPointNoNote": {
+    "description": "No note placeholder for trip point"
+  },
+  "currentLocationLoading": "Fetching location...",
+  "@currentLocationLoading": {
+    "description": "Location loading indicator"
+  },
+  "viewDocument": "View Document",
+  "@viewDocument": {
+    "description": "View document button"
+  },
+  "odometer": "Odometer",
+  "@odometer": {
+    "description": "Odometer label"
+  },
+  "odometerImage": "Odometer Image",
+  "@odometerImage": {
+    "description": "Odometer image label"
+  },
+  "receiptImage": "Receipt Image",
+  "@receiptImage": {
+    "description": "Receipt image label"
+  },
+  "shipmentImages": "Shipment Images",
+  "@shipmentImages": {
+    "description": "Shipment images label"
+  },
+  "deliveryNoteImage": "Delivery Note Image",
+  "@deliveryNoteImage": {
+    "description": "Delivery note image label"
+  },
+  "tollgateImages": "Tollgate Images",
+  "@tollgateImages": {
+    "description": "Tollgate images label"
+  },
+  "tripErrorGeneric": "An error occurred. Please try again.",
+  "@tripErrorGeneric": {
+    "description": "Generic trip error message"
+  },
+  "tripErrorMustBeScheduledToAccept": "Trip must be scheduled to accept.",
+  "@tripErrorMustBeScheduledToAccept": {
+    "description": "Error when accepting non-scheduled trip"
+  },
+  "tripErrorDeliveryNoteRequired": "Delivery note image is required at dropoff.",
+  "@tripErrorDeliveryNoteRequired": {
+    "description": "Error when delivery note is missing at dropoff"
+  },
+  "tripErrorWaypointMustBePending": "Waypoint must be pending.",
+  "@tripErrorWaypointMustBePending": {
+    "description": "Error when waypoint is not pending"
+  },
+  "tripErrorWaypointMustBeArrived": "You must arrive at the waypoint first.",
+  "@tripErrorWaypointMustBeArrived": {
+    "description": "Error when action requires arrival first"
+  },
+  "tripErrorWaypointMustBeLoadingStarted": "Loading must be started first.",
+  "@tripErrorWaypointMustBeLoadingStarted": {
+    "description": "Error when loading not started"
+  },
+  "tripErrorWaypointMustBeLoadingCompleted": "Loading must be completed first.",
+  "@tripErrorWaypointMustBeLoadingCompleted": {
+    "description": "Error when loading not completed"
+  },
+  "tripErrorAllWaypointsMustBeCompleted": "All waypoints must be completed first.",
+  "@tripErrorAllWaypointsMustBeCompleted": {
+    "description": "Error when not all waypoints are completed"
+  },
+  "tripErrorFirstWaypointMustBeLoadingCompleted": "First pickup loading must be completed first.",
+  "@tripErrorFirstWaypointMustBeLoadingCompleted": {
+    "description": "Error when first pickup loading not completed"
+  },
+  "tripErrorTripMustBeInProgress": "Trip must be in progress.",
+  "@tripErrorTripMustBeInProgress": {
+    "description": "Error when trip is not in progress"
+  },
+  "tripErrorTripMustBeDriverAccepted": "Trip must be accepted first.",
+  "@tripErrorTripMustBeDriverAccepted": {
+    "description": "Error when trip not accepted"
+  },
+  "tripErrorTripMustBeFirstPickupLoading": "First pickup loading must be completed first.",
+  "@tripErrorTripMustBeFirstPickupLoading": {
+    "description": "Error when first pickup loading not done"
+  },
+  "tripErrorInvalidImageFormat": "Image must be JPEG, PNG, or WebP.",
+  "@tripErrorInvalidImageFormat": {
+    "description": "Error for invalid image format"
+  },
+  "tripErrorImageTooLarge": "Image must be 10MB or less.",
+  "@tripErrorImageTooLarge": {
+    "description": "Error for image size limit"
+  },
+  "tripErrorInvalidOdometerImage": "Please capture a clear photo of the car odometer.",
+  "@tripErrorInvalidOdometerImage": {
+    "description": "Error when captured image is not an odometer"
+  },
+  "tripErrorUnreadableOdometerImage": "Could not read the odometer. Please retake the photo with better focus.",
+  "@tripErrorUnreadableOdometerImage": {
+    "description": "Error when odometer text cannot be read by OCR"
+  },
+  "loadMore": "Load More",
+  "@loadMore": {
+    "description": "Load more button"
+  },
+  "filterByDate": "Filter by Date",
+  "@filterByDate": {
+    "description": "Filter by date label"
+  },
+  "fromDate": "From",
+  "@fromDate": {
+    "description": "From date filter label"
+  },
+  "toDate": "To",
+  "@toDate": {
+    "description": "To date filter label"
+  },
+  "apply": "Apply",
+  "@apply": {
+    "description": "Apply button"
+  },
+  "clear": "Clear",
+  "@clear": {
+    "description": "Clear button"
+  },
+  "documents": "Documents",
+  "@documents": {
+    "description": "Documents section title"
+  },
+  "documentOpenFailed": "Could not open document. Copy URL?",
+  "@documentOpenFailed": {
+    "description": "Document open failure message with copy option"
+  },
+  "copyUrl": "Copy URL",
+  "@copyUrl": {
+    "description": "Copy URL button"
+  },
+  "urlCopied": "URL copied to clipboard",
+  "@urlCopied": {
+    "description": "URL copied confirmation message"
+  },
+  "documentTypeMissing": "Could not detect document type.",
+  "@documentTypeMissing": {
+    "description": "Shown when document type id is missing before upload or update"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language setting label"
+  },
+  "languageArabic": "Arabic",
+  "@languageArabic": {
+    "description": "Arabic language label"
+  },
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language label"
+  },
+  "navigateToWaypoint": "Navigate to waypoint",
+  "@navigateToWaypoint": {
+    "description": "Button to open external maps for turn-by-turn navigation to the waypoint"
+  },
+  "navigateToPickup": "Navigate to pickup",
+  "@navigateToPickup": {
+    "description": "Button to navigate to pickup waypoint"
+  },
+  "navigateToDropoff": "Navigate to dropoff",
+  "@navigateToDropoff": {
+    "description": "Button to navigate to dropoff waypoint"
+  },
+  "showRoadRoute": "Show road route",
+  "@showRoadRoute": {
+    "description": "Loads Google Directions road-aligned polyline (billable); default map uses straight segments"
+  },
+  "loadingRoadRoute": "Loading route…",
+  "@loadingRoadRoute": {
+    "description": "Shown while fetching road route from Directions API"
+  },
+  "tripCompletedSuccessfully": "Trip Completed Successfully",
+  "@tripCompletedSuccessfully": {
+    "description": "Title on trip completion success screen"
+  },
+  "tripCompletedSuccessMessage": "Thank you for completing the trip. Great job!",
+  "@tripCompletedSuccessMessage": {
+    "description": "Message on trip completion success screen"
+  },
+  "backToTrips": "Back to Trips",
+  "@backToTrips": {
+    "description": "Button to return to trips list from success screen"
+  },
+  "homeLocationServicesDisabled": "Location services are turned off. Turn them on to use the map and go online.",
+  "@homeLocationServicesDisabled": {
+    "description": "Home map when system GPS/location is off"
+  },
+  "homeLocationPermissionDenied": "Location permission was denied. Allow location access to use the map and go online.",
+  "@homeLocationPermissionDenied": {
+    "description": "Home map when user denied location permission"
+  },
+  "homeLocationPermissionDeniedForever": "Location permission is permanently denied. Enable it in the app settings.",
+  "@homeLocationPermissionDeniedForever": {
+    "description": "Home map when location is blocked in system settings"
+  },
+  "homeLocationUnavailable": "Location is unavailable. Try restarting the app.",
+  "@homeLocationUnavailable": {
+    "description": "Home map when Geolocator/plugin fails"
+  },
+  "homeLocationGetPositionFailed": "Could not get your location. Please try again.",
+  "@homeLocationGetPositionFailed": {
+    "description": "Home map when getCurrentPosition fails"
+  },
+  "homeLocationGetInitialFailed": "Could not start location updates. Please try again.",
+  "@homeLocationGetInitialFailed": {
+    "description": "Home map when initial position for tracking fails"
+  },
+  "homeLocationStreamError": "Location updates stopped. Please try again.",
+  "@homeLocationStreamError": {
+    "description": "Home map when position stream errors"
+  },
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "description": "App version display",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "1.0.0"
+      }
+    }
+  },
+  "prominentDisclosureContinue": "Continue",
+  "@prominentDisclosureContinue": {
+    "description": "Button to proceed to the system permission dialog after reading disclosure"
+  },
+  "prominentDisclosureNotNow": "Not now",
+  "@prominentDisclosureNotNow": {
+    "description": "Decline the in-app permission disclosure"
+  },
+  "locationPermissionDisclosureTitle": "How Loadly Contractor uses your location",
+  "@locationPermissionDisclosureTitle": {
+    "description": "Title for in-app location disclosure before system permission"
+  },
+  "locationPermissionDisclosureBody": "Loadly Contractor collects your device location—including in the background when the app is not on screen—while you are online or working on trips. We use it to show your position on the map, switch online/offline accurately, plan routes for pickups and deliveries, and share live location with your company. Location is sent only to Loadly servers as needed for these contractor features.\n\nYou will first be asked to allow location while using the app. If full live tracking is needed, a second screen will explain background access, followed by another system permission step (for example “Allow all the time”). Tap Continue to start.",
+  "@locationPermissionDisclosureBody": {
+    "description": "Prominent disclosure for location including background use (Google Play User Data policy)"
+  },
+  "locationBackgroundPermissionDisclosureTitle": "Location in the background",
+  "@locationBackgroundPermissionDisclosureTitle": {
+    "description": "Title for second disclosure before background / always location permission"
+  },
+  "locationBackgroundPermissionDisclosureBody": "So your company can receive reliable live updates while you drive, Loadly Contractor needs permission to access location in the background (when the app is behind other apps or the screen is off). This is only used for the contractor features described on the previous screen—not for advertising.\n\nTap Continue to open the next system permission. On some devices you must choose “Allow all the time” or enable background location in Settings.",
+  "@locationBackgroundPermissionDisclosureBody": {
+    "description": "Prominent disclosure before ACCESS_BACKGROUND_LOCATION / always permission step"
+  },
+  "locationTrackingNotificationTitle": "Loadly Contractor is online",
+  "@locationTrackingNotificationTitle": {
+    "description": "Android foreground service notification title while sharing live location"
+  },
+  "locationTrackingNotificationText": "Sharing your location with Loadly while you are online.",
+  "@locationTrackingNotificationText": {
+    "description": "Android foreground service notification body while sharing live location"
+  },
+  "notificationPermissionDisclosureTitle": "Notifications",
+  "@notificationPermissionDisclosureTitle": {
+    "description": "Title for in-app notification disclosure before system permission"
+  },
+  "notificationPermissionDisclosureBody": "Loadly Contractor sends notifications about trips, schedules, and important updates. To deliver them, the app uses push notifications and a device token stored on our servers. Tap Continue to open the system permission request.",
+  "@notificationPermissionDisclosureBody": {
+    "description": "Prominent disclosure for notifications (Google Play User Data policy)"
+  },
+  "cameraPermissionDisclosureTitle": "Camera access",
+  "@cameraPermissionDisclosureTitle": {
+    "description": "Title for in-app camera disclosure before system permission"
+  },
+  "cameraPermissionDisclosureBody": "Loadly Contractor uses the camera only when you choose to take a photo—for example for your profile picture or required documents. Photos you take are uploaded to our servers for your contractor account. Tap Continue to open the system permission request.",
+  "@cameraPermissionDisclosureBody": {
+    "description": "Prominent disclosure for camera (Google Play User Data policy)"
+  },
+  "photosPermissionDisclosureTitle": "Photos and files",
+  "@photosPermissionDisclosureTitle": {
+    "description": "Title for in-app photos/library disclosure before system permission"
+  },
+  "photosPermissionDisclosureBody": "Loadly Contractor accesses images you select from your photo library or device storage to upload profile or document images. We only access files you choose. Tap Continue to open the system permission request.",
+  "@photosPermissionDisclosureBody": {
+    "description": "Prominent disclosure for photo library (Google Play User Data policy)"
+  },
+  "appUpdateRequiredTitle": "Update required",
+  "@appUpdateRequiredTitle": {
+    "description": "Title for blocking force update screen"
+  },
+  "appUpdateAvailableTitle": "Update available",
+  "@appUpdateAvailableTitle": {
+    "description": "Title for optional update prompt"
+  },
+  "appUpdateRequiredMessage": "A new version of Loadly Contractor is required to continue. Please update to the latest version.",
+  "@appUpdateRequiredMessage": {
+    "description": "Default message for force update screen"
+  },
+  "appUpdateAvailableMessage": "A new version of Loadly Contractor is available with improvements and fixes.",
+  "@appUpdateAvailableMessage": {
+    "description": "Default message for optional update prompt"
+  },
+  "appUpdateLatestVersion": "Latest version: {version}",
+  "@appUpdateLatestVersion": {
+    "description": "Shows the latest app version on the update prompt",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "1.2.0"
+      }
+    }
+  },
+  "appUpdateNow": "Update now",
+  "@appUpdateNow": {
+    "description": "Primary action to open the app store for an update"
+  },
+  "appUpdateLater": "Later",
+  "@appUpdateLater": {
+    "description": "Dismiss optional update prompt"
+  },
+  "enterCustoms": "Enter customs",
+  "@enterCustoms": {
+    "description": "Enter customs"
+  },
+  "exitCustoms": "Exit customs",
+  "@exitCustoms": {
+    "description": "Exit customs"
+  },
+  "customsTotalAmount": "Customs total amount",
+  "@customsTotalAmount": {
+    "description": "Customs total amount"
+  },
+  "documentImage": "Document image",
+  "@documentImage": {
+    "description": "Document image"
+  },
+  "tripErrorImageMissingRetake": "One or more photos could not be found. Please retake them.",
+  "@tripErrorImageMissingRetake": {
+    "description": "One or more photos could not be found. Please retake them."
+  },
+  "questionMark": "?",
+  "@questionMark": {
+    "description": "question mark"
+  },
+  "invalidCredentials": "Invalid credentials.",
+  "invalidPhoneNumber": "Invalid phone number.",
+  "networkError": "No internet connection.",
+  "unknownError": "Something went wrong.",
+  "requestFailed": "Request failed.",
+  "failedToLoadDrivers": "Failed to load drivers.",
+  "failedToLoadDocumentTypes": "Failed to load document types.",
+  "failedToCreateDriver": "Failed to create driver.",
+  "failedToUpdateTripDriver": "Failed to update trip driver.",
+  "failedToLoadTrip": "Failed to load trip.",
+  "failedToLoadTrips": "Failed to load trips.",
+  "failedToLoadBookingRequests": "Failed to load booking requests.",
+  "failedToBookTrip": "Failed to book trip.",
+  "failedToWithdrawBooking": "Failed to withdraw booking.",
+  "failedToLoadVehicleTypes": "Failed to load vehicle types.",
+  "failedToLoadNotifications": "Failed to load notifications.",
+  "failedToLoadMore": "Failed to load more.",
+  "failedToMarkAsRead": "Failed to mark as read.",
+  "registrationFailed": "Registration failed.",
+  "invalidResponse": "Invalid response. Please try again.",
+  "error400": "Invalid request. Please check your input.",
+  "error401": "Invalid or expired session. Please sign in again.",
+  "error404": "Resource not found.",
+  "error405": "This action is not allowed.",
+  "error422": "The given data was invalid.",
+  "error500": "Server error. Please try again later.",
+  "errorDefault": "Something went wrong. Please try again.",
+  "continuee": "Continue",
+  "trackYourPackageEasily": "Track your package easily",
+  "trackYourPackageEasilyDesc": "Enter your package ID and get real-time updates on your shipment’s journey.",
+  "realtimeNotifications": "Realtime notifications",
+  "realtimeNotificationsDesc": "Get a realtime notification about your package status. You can customize the notification easily.",
+  "uploadYourDocuments": "Upload your documents",
+  "contractorInformation": "Contractor information",
+  "fullName": "Full Name",
+  "addressDetails": "Address details",
+  "uploadImageOrBrowse": "Upload Image or browse",
+  "pngJpgUpTo": "PNG, JPG up to 10MB",
+  "registerConfirm": "I confirm that all personal information provided is correct and I agree to the terms and conditions.",
+  "yourRequestSuccessfullyRegistered": "Your request successfully registered",
+  "yourRequestSuccessfullyRegisteredDesc": "We’ll check your documents. and open your account to receive trips from loadly very soon, maybe checking your paper takes 2 days",
+  "goToHomepage": "Go to homepage",
+  "trips": "Trips",
+  "market": "Market",
+  "marketScreenTitle": "The market",
+  "marketScreenHeaderDesc": "Shop spare parts, tires, and equipment for your fleet.",
+  "marketComingSoonTitle": "Coming soon",
+  "marketComingSoonBody": "A marketplace will soon be launched.",
+  "marketHomePageButton": "Home page",
+  "account": "Account",
+  "enterPasswordEnableBiometric": "Enter your password to enable biometric login.",
+  "biometric": "Biometric",
+  "enableBiometric": "Would you like to enable biometric login for faster access?",
+  "enterPasswordEnableBiometric": "Enter your password to enable biometric login.",
+  "biometricDesc": "Enable to finger print and Pin to open the app.",
+  "languages": "Languages",
+  "helpAndCenter": "Help and center",
+  "helpAndCenterDesc": "Chat or call with our support team for assistance.",
+  "logoutDesc": "Please enable the biometric or your password to make it easy for login again.",
+  "edit": "Edit",
+  "saveChanges": "Save Changes",
+  "back": "Back",
+  "totalTripsCount": "Total trips count",
+  "unpaidAmount": "Unpaid amount",
+  "personalInformation": "Personal information",
+  "language": "Language",
+  "shipping": "Shipping",
+  "completedTripsDue": "Completed trips due",
+  "completedTripsDueUntilNow": "Completed trips due until now",
+  "tripsAndFinancialDue": "Trips and financial due",
+  "contactSupport": "Contact support",
+  "trackTheTrip": "Track the trip",
+  "trackTheTripDesc": "Enter your trip ID and get the realtime tracking.",
+  "enterTripID": "Enter trip ID",
+  "tripRequest": "Trip request",
+  "tripsRequest": "Trips request",
+  "tripsRequestDesc": "All trips request you have.",
+  "tripsReview": "Trips review",
+  "myTripsReview": "Trips review",
+  "completedTrips": "Completed trips",
+  "showAll": "Show All",
+  "loadlyAdminSendThisTripFromAgo": "A Shail admin sent this trip {time} ago.",
+  "@loadlyAdminSendThisTripFromAgo": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tripDate": "Trip date",
+  "tripFrom": "Trip from",
+  "tripTo": "Trip to",
+  "vehicleType": "Vehicle type",
+  "tripCost": "Trip cost",
+  "tripValue": "Value",
+  "waitingForSupervisorApproval": "Waiting for supervisor approval",
+  "editRequest": "Edit request",
+  "cannotEditThisTrip": "This trip cannot be edited",
+  "confirmCancelTrip": "Are you sure you want to cancel this trip?",
+  "editRequestUpdatedTitle": "Request updated",
+  "editRequestUpdatedMessage": "Your booking request has been updated successfully",
+  "cancelTrip": "Cancel trip",
+  "bookTrip": "Book trip",
+  "requestTripBooking": "Request trip booking",
+  "selectDriver": "Select driver",
+  "searchForDriver": "Search for a driver",
+  "noDrivers": "No drivers",
+  "chooseThisDriver": "Choose this driver",
+  "chooseDriverPlaceholder": "Choose driver",
+  "driversFromYourList": "Drivers from your list",
+  "tapToAddNewDriver": "Tap here to add a new driver",
+  "orAddNewDriver": "Or add a new driver",
+  "addNewDriver": "Add new driver",
+  "addDriver": "Add driver",
+  "driverInformation": "Driver information",
+  "driverDocumentsHint": "ID, driving license, and vehicle license",
+  "pleaseUploadRequiredDocuments": "Please upload the required documents",
+  "invalidNationalId": "Invalid national ID",
+  "pickupPoint": "Pickup point",
+  "dropoffPoint": "Drop-off point",
+  "tripBookedTitle": "This trip has been booked for you.",
+  "tripBookedUpdateTitle": "Your booking request has been updated",
+  "tripBookedMessage": "Wait for the representative to approve this trip for you.",
+  "pleaseSelectDriver": "Please select a driver first",
+  "favoriteList": "Favorite list",
+  "preview": "Preview",
+  "newTripRequestsCount": "New trip requests ({count})",
+  "@newTripRequestsCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "allYourTripRequests": "All your trip requests",
+  "allYourBookedTripRequests": "All transfer requests you applied for are waiting for supervisor approval",
+  "notStarted": "Not started",
+  "finishedTransfers": "Finished trips",
+  "cancellations": "Cancelled",
+  "requestedTransfers": "Requested transfers",
+  "homeNewTripBadge": "NEW",
+  "bookedTransfers": "Booked transfers",
+  "requestedTransfersCount": "Requested transfers ({count})",
+  "@requestedTransfersCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "bookedTransfersCount": "Booked transfers ({count})",
+  "@bookedTransfersCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "priceInEgp": "{amount} EGP",
+  "@priceInEgp": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "all": "All",
+  "requested": "Requested",
+  "pending": "Pending",
+  "scheduled": "Scheduled",
+  "inProgress": "In progress",
+  "completed": "Completed",
+  "tripCompleted": "Completed",
+  "tripWasCancelled": "Cancelled",
+  "delivered": "Delivered",
+  "loadingCargo": "Loading",
+  "reviewed": "Reviewed",
+  "cancelled": "Cancelled",
+  "draft": "Draft",
+  "tripInProgress": "Trip in progress",
+  "newRequests": "New requests",
+  "alreadyBooked": "Already booked",
+  "searchForTrip": "Search for trip",
+  "filter": "Filter",
+  "applyFilter": "Apply filter",
+  "clearFilter": "Clear filter",
+  "searchForPlace": "Search for place",
+  "searchForPlaceDesc": "Search for a city or region with available trips that you can access.",
+  "movingFrom": "Moving from",
+  "confirm": "Confirm",
+  "skip": "Skip",
+  "pleaseConfirmYourPassword": "Please confirm your password",
+  "passwordChangedSuccessfully": "Password changed successfully",
+  "tripDetailsNumber": "Trip Details #{id}",
+  "@tripDetailsNumber": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "notDue": "Not due",
+  "financialDetails": "Financial details",
+  "driverDetails": "Driver details",
+  "tripDispatchTime": "Trip dispatch time",
+  "tripAcceptanceTime": "Trip acceptance time",
+  "elapsedTripDuration": "Elapsed trip duration",
+  "distanceInKm": "Distance (km)",
+  "kmCount": "{count} km",
+  "@kmCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "notes": "Notes",
+  "noNotes": "None",
+  "otherDiscounts": "Other discounts",
+  "hoursCount": "{count} {unit}",
+  "@hoursCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "changeDriver": "Change driver",
+  "chooseNewDriver": "Choose new driver",
+  "cancelBooking": "Cancel booking",
+  "confirmChanges": "Confirm changes",
+  "assignTheDriver": "Assign the driver",
+  "chooseDriver": "Choose driver",
+  "yourSupervisorHasApprovedTheTripPleaseAddDriver": "Your supervisor has approved the trip, please add a driver.",
+  "ifDriverIsNotAppointedWithinTheTripWillBeSentToAnotherContractor": "If a driver is not appointed within ??, the trip will be sent to another contractor.",
+  "readyForTrip": "Ready for trip",
+  "youHaveSuccessfullyAddedTheDriver": "You have successfully added the driver.",
+  "youHaveSuccessfullyAddedTheDriverDesc": "The trip will begin in {date}, so be prepared. If you have any questions, please don't hesitate to call the person in charge.",
+  "@youHaveSuccessfullyAddedTheDriverDesc": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "waitingForManagerApproval": "Waiting for manager approval",
+  "today": "Today",
+  "@today": {
+    "description": "Calendar label for the current day"
+  },
+  "chooseVehicleType": "Choose vehicle type",
+  "@chooseVehicleType": {
+    "description": "Placeholder when no vehicle type is selected in a filter"
+  },
+  "tripStartDate": "Trip start date",
+  "@tripStartDate": {
+    "description": "Filter label for trip start date"
+  },
+  "tripEndDate": "Trip end date",
+  "@tripEndDate": {
+    "description": "Filter label for trip end date"
+  },
+  "tripStatus": "Trip status",
+  "@tripStatus": {
+    "description": "Filter label for trip status"
+  },
+  "justNow": "Just now",
+  "@justNow": {
+    "description": "Relative time for notifications within the last minute"
+  },
+  "timeAm": "AM",
+  "@timeAm": {
+    "description": "Morning meridiem label in English trip date display"
+  },
+  "timePm": "PM",
+  "@timePm": {
+    "description": "Evening meridiem label in English trip date display"
+  },
+  "meridiemAm": "AM",
+  "@meridiemAm": {
+    "description": "Morning period label for trip card time in Arabic locale"
+  },
+  "meridiemPm": "PM",
+  "@meridiemPm": {
+    "description": "Evening period label for trip card time in Arabic locale"
+  },
+  "lessThanAMinute": "less than a minute",
+  "@lessThanAMinute": {
+    "description": "Elapsed time when under one minute"
+  },
+  "elapsedMinuteUnit": "minute",
+  "elapsedMinutesUnit": "minutes",
+  "elapsedHourUnit": "hour",
+  "elapsedHoursUnit": "hours",
+  "elapsedDayUnit": "day",
+  "elapsedDaysUnit": "days",
+  "elapsedTwoMinutes": "2 minutes",
+  "elapsedTwoHours": "2 hours",
+  "elapsedTwoDays": "2 days",
+  "elapsedMinuteSingular": "minute",
+  "elapsedMinutesFew": "{count} minutes",
+  "@elapsedMinutesFew": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elapsedMinutesOther": "{count} minutes",
+  "@elapsedMinutesOther": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elapsedHourSingular": "hour",
+  "elapsedHoursFew": "{count} hours",
+  "@elapsedHoursFew": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elapsedHoursOther": "{count} hours",
+  "@elapsedHoursOther": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elapsedDaySingular": "day",
+  "elapsedDaysFew": "{count} days",
+  "@elapsedDaysFew": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elapsedDaysOther": "{count} days",
+  "@elapsedDaysOther": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elapsedMinutesShort": "{count} min",
+  "@elapsedMinutesShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "priceInArabicEgpFull": "{amount} EGP",
+  "@priceInArabicEgpFull": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "routeError": "Route Error",
+  "@routeError": {
+    "description": "Title when navigation routing fails"
+  },
+  "fileSizeKb": "{size} KB",
+  "@fileSizeKb": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "fileSizeMb": "{size} MB",
+  "@fileSizeMb": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "financialDueAllTripsCount": "Total trips : {count}",
+  "@financialDueAllTripsCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dueTripsCountLabel": "Due trips count",
+  "amountDueUntilNow": "Amount due until now",
+  "financialDueAmountDescription": "The due amount is what you receive from Loadly after submitting the trip documents.",
+  "allTrips": "All trips",
+  "dueTransferTripBadge": "Due trip",
+  "entitlementFulfilledBadge": "Entitlement fulfilled",
+  "transferTripPricePrefix": "Trip price :"
+}

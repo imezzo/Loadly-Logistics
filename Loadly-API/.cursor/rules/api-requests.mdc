@@ -1,0 +1,59 @@
+---
+description: Request classes — FromRequest(), nested FluentValidation validator, Permission constant
+globs: LoadlyAggregator.API/Requests/**/*.cs
+alwaysApply: false
+---
+
+# API Requests
+
+A `Request` is the HTTP binding + validation surface, plus a factory to a Domain DTO.
+
+## Each Request file contains
+
+1. A `public const string Permission = "verb_entity";` constant (snake_case, singular entity — `create_company`, `view_tag`, `edit_invoice`) — read by `[HasPermission(RequestClass.Permission)]`. See `authorization.mdc` for the naming conventions.
+2. The request properties with default values (never `null!`), bound from body/query/form.
+3. A `FromRequest()` method returning the matching Domain DTO (e.g. `CreateXDto`, `UpdateXDto`). If an id comes from the route, use `FromRequest(long id)`.
+4. A nested `*RequestValidator : AbstractValidator<TRequest>` in the **same file**, using the extensions in `LoadlyAggregator.API/Validators/Extensions/`.
+
+## Naming
+
+`CreateXRequest`, `UpdateXRequest`, `ListXRequest`, `GetXRequest`, `DeleteXRequest`, `BulkUpdateXStatusRequest`.
+
+## Example (shape mirrors `CreateAdminRequest`)
+
+```csharp
+public class CreateAdminRequest
+{
+    public const string Permission = "create_admin";
+
+    public string FullName { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public List<long>? RoleIds { get; set; }
+
+    public CreateAdminDto FromRequest() => new()
+    {
+        FullName = FullName,
+        UserName = UserName,
+        RoleIds = RoleIds
+    };
+}
+
+public class CreateAdminRequestValidator : AbstractValidator<CreateAdminRequest>
+{
+    public CreateAdminRequestValidator(IAdminRepository adminRepository)
+    {
+        RuleFor(x => x.FullName).IsRequiredFullName();
+        RuleFor(x => x.UserName)
+            .IsRequiredUserName()
+            .IsUnique(async u => await adminRepository.GetByUserNameAsync(u) == null,
+                      _ => "auth.username_already_taken");
+    }
+}
+```
+
+## Anti-patterns
+
+- ❌ Doing EF/repository work inside `FromRequest()` — it only maps fields.
+- ❌ Validating in `FromRequest()` — all validation lives in the FluentValidation class.
+- ❌ Duplicating a validation primitive instead of reusing one from `Validators/Extensions/`.
+- ❌ Omitting the `Permission` constant on an authenticated endpoint request.

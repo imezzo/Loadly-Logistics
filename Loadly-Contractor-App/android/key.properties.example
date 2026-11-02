@@ -1,0 +1,11 @@
+# Copy this file to android/key.properties and fill in your values.
+# Never commit key.properties or the keystore file to Git.
+#
+# storeFile is relative to the android/ directory (Gradle rootProject).
+# Example below expects: android/keystore/upload-keystore.jks
+# If you use storeFile=upload-keystore.jks it must be at: android/upload-keystore.jks
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=upload
+storeFile=upload-keystore.jks

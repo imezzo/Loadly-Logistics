@@ -1,0 +1,297 @@
+name: Build and Deploy to S3
+
+on:
+  push:
+    branches: [ staging ]
+
+env:
+  NODE_VERSION: '20'
+  AWS_REGION: 'eu-west-1'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Update .env.admin-dashboard with Secrets
+      env:
+        VITE_PORT: ${{ vars.VITE_PORT_ADMIN }}
+        VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL_ADMIN }}
+        VITE_API_BASE_MODE: ${{ vars.VITE_API_BASE_MODE_ADMIN }}
+        VITE_PRODUCTION: ${{ vars.VITE_PRODUCTION_ADMIN }}
+        VITE_BRAND_NAME: ${{ vars.VITE_BRAND_NAME_ADMIN }}
+        VITE_DEFAULT_LANGUAGE: ${{ vars.VITE_DEFAULT_LANGUAGE_ADMIN }}
+      run: |
+        envsubst < .env-admin-ic > .env-admin-ic.tmp
+        mv .env-admin-ic.tmp .env.admin-dashboard
+
+    - name: Update .env.app-dashboard with Secrets
+      env:
+        VITE_PORT: ${{ vars.VITE_PORT_APP }}
+        VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL_APP }}
+        VITE_API_BASE_MODE: ${{ vars.VITE_API_BASE_MODE_APP }}
+        VITE_PRODUCTION: ${{ vars.VITE_PRODUCTION_APP }}
+        VITE_BRAND_NAME: ${{ vars.VITE_BRAND_NAME_APP }}
+        VITE_DEFAULT_LANGUAGE: ${{ vars.VITE_DEFAULT_LANGUAGE_APP }}
+      run: |
+        envsubst < .env-app-ic > .env-app-ic.tmp
+        mv .env-app-ic.tmp .env.app-dashboard
+
+    - name: Update .env.company-dashboard with Secrets
+      env:
+        VITE_PORT: ${{ vars.VITE_PORT_COMPANY }}
+        VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL_COMPANY }}
+        VITE_API_BASE_MODE: ${{ vars.VITE_API_BASE_MODE_COMPANY }}
+        VITE_PRODUCTION: ${{ vars.VITE_PRODUCTION_COMPANY }}
+        VITE_BRAND_NAME: ${{ vars.VITE_BRAND_NAME_COMPANY }}
+        VITE_DEFAULT_LANGUAGE: ${{ vars.VITE_DEFAULT_LANGUAGE_COMPANY }}
+      run: |
+        envsubst < .env-company-ic > .env-company-ic.tmp
+        mv .env-company-ic.tmp .env.company-dashboard
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linting
+      run: npm run lint
+
+    # - name: Run type check
+    #   run: npm run type-check
+
+    - name: Build applications
+      run: npm run build
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_LOADLY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_LOADLY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Deploy to Staging S3
+      run: |
+        # Sync each dashboard to its respective Staging S3 bucket
+        aws s3 sync dist/admin-dashboard s3://${{ secrets.S3_ADMIN_BUCKET_NAME }} --delete --cache-control "public,max-age=31536000"
+        aws s3 sync dist/app-dashboard s3://${{ secrets.S3_APP_BUCKET_NAME }} --delete --cache-control "public,max-age=31536000"
+        aws s3 sync dist/company-dashboard s3://${{ secrets.S3_COMPANY_BUCKET_NAME }} --delete --cache-control "public,max-age=31536000"
+        
+        # Set proper cache control for HTML files (shorter cache for SPA routing)
+        aws s3 cp dist/admin-dashboard/index.html s3://${{ secrets.S3_ADMIN_BUCKET_NAME }}/index.html --cache-control "public,max-age=300"
+        aws s3 cp dist/app-dashboard/index.html s3://${{ secrets.S3_APP_BUCKET_NAME }}/index.html --cache-control "public,max-age=300"
+        aws s3 cp dist/company-dashboard/index.html s3://${{ secrets.S3_COMPANY_BUCKET_NAME }}/index.html --cache-control "public,max-age=300"
+
+    - name: Create CloudFront invalidation
+      if: github.ref == 'refs/heads/staging'
+      run: |
+        # Invalidate CloudFront distributions for each dashboard if configured
+        if [ -n "${{ secrets.CLOUDFRONT_ADMIN_DISTRIBUTION_ID }}" ]; then
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_ADMIN_DISTRIBUTION_ID }} \
+            --paths "/*"
+        fi
+        if [ -n "${{ secrets.CLOUDFRONT_APP_DISTRIBUTION_ID }}" ]; then
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_APP_DISTRIBUTION_ID }} \
+            --paths "/*"
+        fi
+        if [ -n "${{ secrets.CLOUDFRONT_COMPANY_DISTRIBUTION_ID }}" ]; then
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_COMPANY_DISTRIBUTION_ID }} \
+            --paths "/*"
+        fi
+  Notify-teams:
+    name: Notify Teams
+    needs: [build-and-deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post build and deploy status
+        env:
+          WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          JOB_STATUS: ${{ needs.build-and-deploy.result }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "TEAMS_WEBHOOK_URL empty — skip notify"
+            exit 0
+          fi
+
+          ENVIRONMENT="staging"
+          PHASE="Build & Deploy"
+
+          case "$JOB_STATUS" in
+            success)
+              CONTAINER_STYLE="good"
+              STATUS_COLOR="good"
+              STATUS_EMOJI="✅"
+              STATUS_LABEL="Succeeded"
+              ;;
+            failure)
+              CONTAINER_STYLE="attention"
+              STATUS_COLOR="attention"
+              STATUS_EMOJI="❌"
+              STATUS_LABEL="Failed"
+              ;;
+            cancelled)
+              CONTAINER_STYLE="warning"
+              STATUS_COLOR="warning"
+              STATUS_EMOJI="⚠️"
+              STATUS_LABEL="Cancelled"
+              ;;
+            skipped)
+              CONTAINER_STYLE="emphasis"
+              STATUS_COLOR="default"
+              STATUS_EMOJI="⏭️"
+              STATUS_LABEL="Skipped"
+              ;;
+            *)
+              CONTAINER_STYLE="accent"
+              STATUS_COLOR="accent"
+              STATUS_EMOJI="ℹ️"
+              STATUS_LABEL="$JOB_STATUS"
+              ;;
+          esac
+
+          SHORT_SHA="${SHA:0:7}"
+          TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          TITLE="${STATUS_EMOJI}  ${ENVIRONMENT^} ${PHASE}: ${STATUS_LABEL}"
+          ENV_LABEL="${ENVIRONMENT^}"
+          PHASE_LABEL="🚀 ${PHASE}"
+
+          PAYLOAD=$(jq -n \
+            --arg title "$TITLE" \
+            --arg repo "$REPO" \
+            --arg env "$ENV_LABEL" \
+            --arg phase "$PHASE_LABEL" \
+            --arg status "${STATUS_EMOJI} ${STATUS_LABEL}" \
+            --arg status_color "$STATUS_COLOR" \
+            --arg container_style "$CONTAINER_STYLE" \
+            --arg branch "$REF_NAME" \
+            --arg commit "$SHORT_SHA" \
+            --arg actor "$ACTOR" \
+            --arg run "#${RUN_NUMBER}" \
+            --arg target "S3 + CloudFront" \
+            --arg time "$TIME" \
+            --arg run_url "$RUN_URL" \
+            '{
+              "type": "message",
+              "attachments": [{
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "contentUrl": null,
+                "content": {
+                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "type": "AdaptiveCard",
+                  "version": "1.4",
+                  "msteams": { "width": "Full" },
+                  "body": [
+                    {
+                      "type": "Container",
+                      "style": $container_style,
+                      "bleed": true,
+                      "items": [
+                        {
+                          "type": "TextBlock",
+                          "text": $title,
+                          "weight": "Bolder",
+                          "size": "Large",
+                          "wrap": true,
+                          "color": "Light"
+                        },
+                        {
+                          "type": "TextBlock",
+                          "text": $repo,
+                          "size": "Medium",
+                          "weight": "Bolder",
+                          "wrap": true,
+                          "spacing": "Small",
+                          "color": "Light"
+                        },
+                        {
+                          "type": "TextBlock",
+                          "text": $time,
+                          "size": "Small",
+                          "isSubtle": true,
+                          "spacing": "None",
+                          "color": "Light"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Container",
+                      "spacing": "Medium",
+                      "items": [
+                        {
+                          "type": "ColumnSet",
+                          "columns": [
+                            {
+                              "type": "Column",
+                              "width": "stretch",
+                              "items": [
+                                {"type": "TextBlock", "text": "ENVIRONMENT", "size": "Small", "isSubtle": true, "spacing": "None"},
+                                {"type": "TextBlock", "text": $env, "weight": "Bolder", "size": "Medium", "spacing": "None", "wrap": true}
+                              ]
+                            },
+                            {
+                              "type": "Column",
+                              "width": "stretch",
+                              "items": [
+                                {"type": "TextBlock", "text": "PHASE", "size": "Small", "isSubtle": true, "spacing": "None"},
+                                {"type": "TextBlock", "text": $phase, "weight": "Bolder", "size": "Medium", "spacing": "None", "wrap": true}
+                              ]
+                            },
+                            {
+                              "type": "Column",
+                              "width": "stretch",
+                              "items": [
+                                {"type": "TextBlock", "text": "STATUS", "size": "Small", "isSubtle": true, "spacing": "None"},
+                                {"type": "TextBlock", "text": $status, "weight": "Bolder", "size": "Medium", "spacing": "None", "wrap": true, "color": $status_color}
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "FactSet",
+                          "spacing": "Medium",
+                          "facts": [
+                            {"title": "Branch", "value": $branch},
+                            {"title": "Commit", "value": $commit},
+                            {"title": "Triggered by", "value": $actor},
+                            {"title": "Run", "value": $run},
+                            {"title": "Target", "value": $target}
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": "Action.OpenUrl",
+                      "title": "🔗  View workflow run",
+                      "url": $run_url,
+                      "style": "positive"
+                    }
+                  ]
+                }
+              }]
+            }')
+
+          curl --fail --silent --show-error \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$WEBHOOK_URL"
+          echo "Teams notify sent: ${TITLE}"

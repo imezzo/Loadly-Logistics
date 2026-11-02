@@ -1,0 +1,18 @@
+export default {
+  brandLogo: 'شعار {brand}',
+  breadcrumb: 'مسار التنقل',
+  close: 'إغلاق',
+  delete: 'حذف',
+  edit: 'تعديل',
+  enterFullscreen: 'دخول وضع ملء الشاشة',
+  exit: 'خروج',
+  exitFullscreen: 'الخروج من وضع ملء الشاشة',
+  notifications: 'الإشعارات',
+  searchOptions: 'خيارات البحث',
+  selectTrip: 'تحديد الرحلة {id}',
+  sidebarNavigation: 'القائمة الجانبية',
+  toggle: 'تبديل',
+  togglePasswordVisibility: 'إظهار/إخفاء كلمة المرور',
+  userAvatar: 'صورة المستخدم',
+  view: 'عرض',
+}

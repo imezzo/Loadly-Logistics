@@ -1,0 +1,134 @@
+# name: Staging Build and Push Docker Image
+
+# on:
+#   push:
+#     branches: [ feat/new-cicd ]
+
+# jobs:
+#   Staging-build:
+#     name: Staging (Build-Push)
+#     environment: staging
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v4
+
+#     - name: Set up QEMU
+#       uses: docker/setup-qemu-action@v3
+
+#     - name: Set up Docker Buildx
+#       uses: docker/setup-buildx-action@v3
+
+#     - name: Log in to Docker Hub
+#       uses: docker/login-action@v3
+#       with:
+#         username: ${{ secrets.DOCKER_HUB_USERNAME_LOADLY }}
+#         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN_LOADLY }}
+
+#     - name: Set environment variables for Staging
+#       env:
+#         ASPNETCORE_ENVIRONMENT: ${{ vars.ASPNETCORE_ENVIRONMENT || 'Staging' }}
+#         ASPNETCORE_URLS: ${{ vars.ASPNETCORE_URLS || 'http://+:8080' }}
+#         DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION }}
+#         DB_LOGS_CONNECTION_STRING: ${{ secrets.DB_LOGS_CONNECTION }}
+#         REDIS_CONNECTION_STRING: ${{ secrets.REDIS_CONNECTION }}
+#         JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+#         JWT_ISSUER: ${{ vars.JWT_ISSUER || 'LoadlyAggregator' }}
+#         JWT_AUDIENCE: ${{ vars.JWT_AUDIENCE || 'LoadlyAggregator' }}
+#         JWT_EXPIRATION_MINUTES: ${{ vars.JWT_EXPIRATION_MINUTES || '60' }}
+#         SMTP_HOST: ${{ vars.SMTP_HOST || 'email-smtp.eu-west-1.amazonaws.com' }}
+#         SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
+#         SMTP_USERNAME: ${{ vars.SMTP_USERNAME || 'AKIAR45RBDMV6J7E6AO3' }}
+#         SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+#         SMTP_FROM_EMAIL: ${{ vars.SMTP_FROM_EMAIL || 'admin@fuelin.net' }}
+#         SMTP_FROM_NAME: ${{ vars.SMTP_FROM_NAME || 'Loadly Aggregator' }}
+#         SMTP_ENABLE_SSL: ${{ vars.SMTP_ENABLE_SSL || 'true' }}
+#         SMTP_USE_DEFAULT_CREDENTIALS: ${{ vars.SMTP_USE_DEFAULT_CREDENTIALS || 'false' }}
+#         SMS_PROVIDER: ${{ vars.SMS_PROVIDER || 'ultramsg' }}
+#         AKEDLY_API_KEY: ${{ secrets.AKEDLY_API_KEY }}
+#         AKEDLY_PIPELINE_ID: ${{ secrets.AKEDLY_PIPELINE_ID }}
+#         AKEDLY_API_URL: ${{ vars.AKEDLY_API_URL || 'https://api.akedly.io/api/v1' }}
+#         VICTORY_LINK_USERNAME: ${{ secrets.VICTORY_LINK_USERNAME }}
+#         VICTORY_LINK_PASSWORD: ${{ secrets.VICTORY_LINK_PASSWORD }}
+#         VICTORY_LINK_SENDER_NAME: ${{ vars.VICTORY_LINK_SENDER_NAME || 'fuelin' }}
+#         VICTORY_LINK_API_URL: ${{ vars.VICTORY_LINK_API_URL || 'https://app.community-ads.com/SendSMSAPI/api/SMSSender/SendSMS' }}
+#         ULTRAMSG_TOKEN: ${{ secrets.ULTRAMSG_TOKEN }}
+#         ULTRAMSG_INSTANCE_ID: ${{ secrets.ULTRAMSG_INSTANCE_ID }}
+#         STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 's3' }}
+#         CDN_DOMAIN: ${{ vars.CDN_DOMAIN }}
+#         CDN_MAIN_FOLDER: ${{ vars.CDN_MAIN_FOLDER || 'loadly-staging' }}
+#         STORAGE_PATH: ${{ vars.STORAGE_PATH || 'wwwroot/uploads' }}
+#         AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET || 'stg-agg-loadly' }}
+#         AWS_REGION: ${{ vars.AWS_REGION || 'eu-west-1' }}
+#         AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+#         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+#         AWS_CDN_DOMAIN: ${{ vars.AWS_CDN_DOMAIN || 'https://d2pgrryr0ci1xm.cloudfront.net' }}
+#         ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
+#         ROLLBAR_ENVIRONMENT: ${{ vars.ROLLBAR_ENVIRONMENT || 'Staging' }}
+#         LOG_LEVEL_DEFAULT: ${{ vars.LOG_LEVEL_DEFAULT || 'Information' }}
+#         LOG_LEVEL_ASPNETCORE: ${{ vars.LOG_LEVEL_ASPNETCORE || 'Warning' }}
+#         ADMINURL: ${{ vars.ADMINURL || 'https://stg-admin.loadly-eg.com' }}
+#         DRIVERURL: ${{ vars.DRIVERURL || 'https://stg-app.loadly-eg.com' }}
+#         COMPANYURL: ${{ vars.COMPANYURL || 'https://stg-company.loadly-eg.com' }}
+#         CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS || 'http://localhost:3000,https://stg-admin.loadly-eg.com,https://stg-company.loadly-eg.com,https://stg-app.loadly-eg.com' }}
+#         FIREBASE_CREDENTIALS_PATH: ${{ secrets.FIREBASE_CREDENTIALS_PATH || '/app/firebase-credentials.json' }}
+
+#       run: |
+#         # Create Firebase credentials file from secret
+#         echo '${{ secrets.FIREBASE_CREDENTIALS_JSON }}' > firebase-credentials.json
+        
+#         # Replace placeholders in main appsettings.json for Staging
+#         envsubst < LoadlyAggregator.API/appsettings.ci.json > LoadlyAggregator.API/appsettings.tmp
+#         rm -rf LoadlyAggregator.API/appsettings.json || true
+#         mv LoadlyAggregator.API/appsettings.tmp LoadlyAggregator.API/appsettings.json
+#         rm -rf LoadlyAggregator.API/appsettings.ci.json || true
+
+#     - name: Build and push Docker image
+#       uses: docker/build-push-action@v6
+#       env:
+#           DOCKER_CLIENT_TIMEOUT: 300
+#           COMPOSE_HTTP_TIMEOUT: 300
+#       with:
+#         build-args: |
+#           BUILDKIT_INLINE_CACHE=1
+#           APP_ENV=staging
+#           VERSION=${{ github.run_number }}
+#         cache-from: |
+#           type=gha,scope=staging
+#           type=registry,ref=loadlyeg/shayyal-stg-api-agg:cache
+#         cache-to: |
+#           type=gha,mode=max,scope=staging
+#           type=registry,ref=loadlyeg/shayyal-stg-api-agg:cache,mode=max
+#         context: .
+#         labels: |
+#           org.opencontainers.image.source=${{ github.repository }} - Staging
+#         push: true
+#         tags: |
+#           loadlyeg/shayyal-stg-api-agg:latest
+#           loadlyeg/shayyal-stg-api-agg:${{ github.run_number }}
+
+#   Deploy-staging:
+#     name: Staging-Deploy
+#     environment: staging
+#     needs: Staging-build
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/feat/new-cicd' && github.event_name == 'push'
+
+#     steps:
+#       - name: Checkout Repository
+#         id: checkout_repository
+#         uses: actions/checkout@v4
+
+#       - name: Set up SSH agent
+#         uses: webfactory/ssh-agent@v0.9.0
+#         with:
+#           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_STAGING }}
+
+#       - name: SSH Connect & Execute Commands
+#         env:
+#           USER: ubuntu
+#           HOST: 52.213.113.57
+#         run: |
+#           ssh -o StrictHostKeyChecking=no ${USER}@${HOST} \
+#           "sudo su -c '/root/stg-loadly/deploy.sh api:${{ github.run_number }}'"

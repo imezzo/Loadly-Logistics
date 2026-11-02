@@ -1,0 +1,9 @@
+export const CONTRACT_STATUS = {
+  DRAFT: 0,
+  PENDING: 1,
+  ACTIVE: 2,
+  INACTIVE: 3,
+  EXPIRED: 4,
+  RENEWED: 5,
+  TERMINATED: 6,
+}

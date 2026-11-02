@@ -1,0 +1,46 @@
+using FluentValidation;
+using LoadlyAggregator.API.Validators.Extensions;
+using LoadlyAggregator.Domain.Common.Models;
+using LoadlyAggregator.Domain.Driver.DTOs.Trips;
+using LoadlyAggregator.Shared.Constants;
+
+namespace LoadlyAggregator.API.Requests.Driver.Trips;
+
+public class DriverExitsCustomsRequest
+{
+    public decimal? CustomsTotalAmount { get; set; }
+    public string? Note { get; set; }
+    public List<FileUpload>? CustomsReceipts { get; set; }
+
+    public DriverExitsCustomsDto FromRequest(long tripId, long driverId) => new()
+    {
+        TripId = tripId,
+        DriverId = driverId,
+        CustomsTotalAmount = CustomsTotalAmount,
+        Note = Note,
+        CustomsReceipts = CustomsReceipts
+    };
+}
+
+public class DriverExitsCustomsRequestValidator : AbstractValidator<DriverExitsCustomsRequest>
+{
+    public DriverExitsCustomsRequestValidator()
+    {
+        RuleFor(x => x.CustomsTotalAmount)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage(TripMessageKeys.CustomsTotalAmountInvalid)
+            .When(x => x.CustomsTotalAmount.HasValue);
+
+        RuleFor(x => x.CustomsReceipts)
+            .Must(images => images == null || images.Count <= TripImageValidationRules.MaxCustomsReceipts)
+            .WithMessage(TripMessageKeys.CustomsReceiptsMax10)
+            .When(x => x.CustomsReceipts != null);
+
+        RuleForEach(x => x.CustomsReceipts)
+            .Must(image => image.Length <= TripImageValidationRules.MaxImageSizeBytes)
+            .WithMessage(TripMessageKeys.CustomsReceiptImageSizeExceeded)
+            .Must(image => TripImageValidationRules.AllowedImageTypes.Contains(image.ContentType.ToLower()))
+            .WithMessage(TripMessageKeys.CustomsReceiptImageType)
+            .When(x => x.CustomsReceipts != null);
+    }
+}

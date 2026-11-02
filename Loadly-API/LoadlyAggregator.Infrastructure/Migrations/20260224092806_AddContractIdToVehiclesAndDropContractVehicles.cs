@@ -1,0 +1,128 @@
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+
+#nullable disable
+
+namespace LoadlyAggregator.Infrastructure.Migrations;
+
+/// <inheritdoc />
+public partial class AddContractIdToVehiclesAndDropContractVehicles : Migration
+{
+    /// <inheritdoc />
+    protected override void Up(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.AddColumn<long>(
+            name: "contract_id",
+            table: "vehicles",
+            type: "bigint",
+            nullable: true);
+
+        migrationBuilder.Sql(@"
+                UPDATE vehicles v
+                SET contract_id = cv.contract_id
+                FROM contract_vehicles cv
+                WHERE v.id = cv.vehicle_id
+                  AND cv.deleted_at IS NULL
+            ");
+
+        migrationBuilder.CreateIndex(
+            name: "IX_vehicles_contract_id",
+            table: "vehicles",
+            column: "contract_id");
+
+        migrationBuilder.AddForeignKey(
+            name: "FK_vehicles_contracts_contract_id",
+            table: "vehicles",
+            column: "contract_id",
+            principalTable: "contracts",
+            principalColumn: "id",
+            onDelete: ReferentialAction.SetNull);
+
+        migrationBuilder.DropTable(
+            name: "contract_vehicles");
+    }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropForeignKey(
+            name: "FK_vehicles_contracts_contract_id",
+            table: "vehicles");
+
+        migrationBuilder.DropIndex(
+            name: "IX_vehicles_contract_id",
+            table: "vehicles");
+
+        migrationBuilder.DropColumn(
+            name: "contract_id",
+            table: "vehicles");
+
+        migrationBuilder.CreateTable(
+            name: "contract_vehicles",
+            columns: table => new
+            {
+                id = table.Column<long>(type: "bigint", nullable: false)
+                    .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                contract_id = table.Column<long>(type: "bigint", nullable: false),
+                vehicle_id = table.Column<long>(type: "bigint", nullable: false),
+                vehicle_tail_id = table.Column<long>(type: "bigint", nullable: true),
+                added_by = table.Column<long>(type: "bigint", nullable: true),
+                assigned_from = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                assigned_to = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                status = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
+                updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_contract_vehicles", x => x.id);
+                table.ForeignKey(
+                    name: "FK_contract_vehicles_contracts_contract_id",
+                    column: x => x.contract_id,
+                    principalTable: "contracts",
+                    principalColumn: "id",
+                    onDelete: ReferentialAction.Restrict);
+                table.ForeignKey(
+                    name: "FK_contract_vehicles_vehicles_vehicle_id",
+                    column: x => x.vehicle_id,
+                    principalTable: "vehicles",
+                    principalColumn: "id",
+                    onDelete: ReferentialAction.Restrict);
+                table.ForeignKey(
+                    name: "FK_contract_vehicles_vehicles_vehicle_tail_id",
+                    column: x => x.vehicle_tail_id,
+                    principalTable: "vehicles",
+                    principalColumn: "id",
+                    onDelete: ReferentialAction.Restrict);
+            });
+
+        migrationBuilder.CreateIndex(
+            name: "IX_contract_vehicles_contract_id",
+            table: "contract_vehicles",
+            column: "contract_id");
+
+        migrationBuilder.CreateIndex(
+            name: "IX_contract_vehicles_status",
+            table: "contract_vehicles",
+            column: "status");
+
+        migrationBuilder.CreateIndex(
+            name: "ix_contract_vehicles_unique_combination",
+            table: "contract_vehicles",
+            columns: new[] { "contract_id", "vehicle_id", "vehicle_tail_id" },
+            unique: true,
+            filter: "\"deleted_at\" IS NULL");
+
+        migrationBuilder.CreateIndex(
+            name: "IX_contract_vehicles_vehicle_id",
+            table: "contract_vehicles",
+            column: "vehicle_id");
+
+        migrationBuilder.CreateIndex(
+            name: "IX_contract_vehicles_vehicle_tail_id",
+            table: "contract_vehicles",
+            column: "vehicle_tail_id");
+    }
+}

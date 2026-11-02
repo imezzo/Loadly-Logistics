@@ -1,0 +1,30 @@
+.page {
+  @apply lg:ms-sidebar mt-16 lg:mt-header min-h-screen bg-theme px-4 py-6 overflow-x-hidden;
+}
+
+.page-content {
+  @apply mx-auto w-full rounded-2xl bg-white p-6 min-h-[calc(100vh-(var(--spacing-header))-(--spacing(10)))];
+}
+
+.loader {
+  @apply w-full h-0.5 block relative bg-neutral-300 overflow-hidden;
+
+  &::after {
+    @apply content-[''] w-[192px] h-0.5 bg-primary absolute top-0 left-0 box-border;
+
+    animation: loader-animator 2s infinite;
+  }
+}
+
+@keyframes loader-animator {
+  0% {
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  100% {
+    left: 100%;
+    transform: translateX(0%);
+  }
+}
+

@@ -1,0 +1,35 @@
+html {
+  @apply en:font-manrope ar:font-cairo antialiased capitalize;
+
+  &[lang="ar"] {
+    direction: rtl;
+  }
+}
+
+button {
+  @apply cursor-pointer disabled:cursor-default disabled:opacity-50;
+}
+
+::-webkit-scrollbar {
+  @apply w-1.5 h-1.5;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-neutral-500 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-black/30 rounded-full transition-colors;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-black/50;
+}
+
+::-webkit-scrollbar-thumb:active {
+  @apply bg-black/60;
+}
+
+::-webkit-scrollbar-corner {
+  @apply bg-transparent;
+}

@@ -1,0 +1,43 @@
+---
+description: Domain Actions — single responsibility, DTO in / DTO out, Shared exceptions, no HTTP/Infra types
+globs: LoadlyAggregator.Domain/**/Actions/**/*.cs
+alwaysApply: false
+---
+
+# Domain Actions
+
+An Action is a single business use case. One class, one `ExecuteAsync`.
+
+## Shape
+
+- Name: `CreateXAction`, `GetXAction`, `ListXAction`, `UpdateXAction`, `DeleteXAction`, `BulkUpdateXStatusAction`.
+- Return value: `Task ExecuteAsync(CreateXDto dto)` for commands that only need a success message; `Task<TResponse> ExecuteAsync(TRequest req)` when data is returned.
+- Inputs/outputs: **only** types from `LoadlyAggregator.Domain` and `LoadlyAggregator.Shared`. No `HttpContext`, no `IActionResult`, no API Request/Resource types.
+- Dependencies: inject Domain interfaces (repositories, services, filter utilities) via primary constructor; use `IUnitOfWork.SaveChangesAsync()` to persist.
+
+## Guard & throw
+
+Fail fast with Shared exceptions carrying i18n keys:
+
+```csharp
+var admin = await _adminRepository.GetByIdAsync(dto.Id)
+    ?? throw new NotFoundException("admins.not_found_with_id", dto.Id);
+
+if (contract.Status != ContractStatus.APPROVED)
+    throw new ValidationException("contracts.must_be_approved_before_invoicing");
+```
+
+Use `NotFoundException`, `ValidationException`, `UnauthorizedException`, `ForbiddenException`, `LogicalException`, `TooManyRequestsException` from `LoadlyAggregator.Shared.Exceptions`.
+
+## Keep it flat
+
+- No long `if/else` chains — extract Strategy/Builder/Resolver or private methods (`ValidateX`, `LoadX`, `BuildResponse`).
+- Push query filtering into an `XFilterUtility` for List actions.
+- Group multi-step work into private methods; `ExecuteAsync` should read like a short recipe.
+
+## Anti-patterns
+
+- ❌ Taking `CreateAdminRequest` directly from the API layer — always consume `CreateAdminDto`.
+- ❌ Catching exceptions to translate them — let them bubble to the middleware.
+- ❌ Returning entities (`Admin`, `Contract`) — return a DTO/Response.
+- ❌ Calling `SaveChangesAsync()` multiple times per action without a transaction when work must be atomic.

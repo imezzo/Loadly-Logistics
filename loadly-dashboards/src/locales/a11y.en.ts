@@ -1,0 +1,18 @@
+export default {
+  brandLogo: '{brand} Logo',
+  breadcrumb: 'Breadcrumb',
+  close: 'Close',
+  delete: 'Delete',
+  edit: 'Edit',
+  enterFullscreen: 'Enter fullscreen',
+  exit: 'Exit',
+  exitFullscreen: 'Exit fullscreen',
+  notifications: 'Notifications',
+  searchOptions: 'Search options',
+  selectTrip: 'Select trip {id}',
+  sidebarNavigation: 'Sidebar navigation',
+  toggle: 'Toggle',
+  togglePasswordVisibility: 'Toggle password visibility',
+  userAvatar: 'User avatar',
+  view: 'View',
+}

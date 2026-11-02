@@ -1,0 +1,46 @@
+---
+description: FluentValidation style — reuse Validators/Extensions, dotted i18n keys, no business lookups in validators
+globs: LoadlyAggregator.API/Validators/**/*.cs,LoadlyAggregator.API/Requests/**/*.cs
+alwaysApply: false
+---
+
+# FluentValidation
+
+All validation lives in `AbstractValidator<TRequest>` classes next to the Request. Use the shared rules in `LoadlyAggregator.API/Validators/Extensions/`.
+
+## Reuse before writing
+
+Prefer these over hand-rolled rules:
+
+- `IsRequiredId`, `IsOptionalId` — long ids (> 0).
+- `IsRequiredString`, `IsOptionalString`, `IsRequiredStringWithMinLength` — strings with max/min length.
+- `IsRequiredFullName`, `IsRequiredUserName`, `IsRequiredEmail`, `IsRequiredEgyptianPhone` — user fields.
+- `IsValidPage`, `IsValidPageSize` — pagination.
+- `IsUnique(async predicate, keyFactory)` — DB uniqueness.
+- `MustBeAdminMfaChannel`, `IsInEnum()` — enum guards.
+- Date, file, multilingual, collection, status, numeric helpers — see `Validators/Extensions/`.
+
+If a new primitive is needed, **add it as a reusable extension** under `Validators/Extensions/`, don't inline it.
+
+## Message keys
+
+Every `.WithMessage(...)` must be a **dotted i18n key** that exists in both `Messages.en.json` and `Messages.ar.json`. Use `|` to pass positional args:
+
+```csharp
+RuleFor(x => x.UserName)
+    .IsRequiredUserName()
+    .IsUnique(async u => await adminRepository.GetByUserNameAsync(u) == null,
+              _ => "auth.username_already_taken");
+
+RuleFor(x => x.Payments)
+    .NotEmpty()
+    .WithMessage("validation.collection_at_least_one|Payments");
+```
+
+Never hardcode English in `.WithMessage()`.
+
+## Scope boundary
+
+- Validators check **shape** (required, length, format, uniqueness, enum range, cross-field consistency).
+- Validators may inject repositories only for `IsUnique`-style lookups.
+- Business invariants (e.g. "contract must be approved before invoicing") belong in the Action, not the validator — thrown as `ValidationException` or `LogicalException`.

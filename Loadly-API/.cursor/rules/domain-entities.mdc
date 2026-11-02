@@ -1,0 +1,43 @@
+---
+description: Entities — inherit BaseEntity, keep anemic, no API/Infra references, soft-delete-aware
+globs: LoadlyAggregator.Domain/Common/Entities/**/*.cs
+alwaysApply: false
+---
+
+# Domain Entities
+
+Entities map 1-to-1 to database tables. Keep them anemic; business logic lives in Actions and Domain Services.
+
+## Rules
+
+- Inherit `BaseEntity` — you automatically get `Id`, `CreatedAt`, `UpdatedAt`, `DeletedAt`, `IsDeleted`, `IAuditable`, `ISoftDeletable`.
+- Properties only (plus navigation collections). No methods except trivial computed read-only helpers that touch only this entity's own fields.
+- No references to `LoadlyAggregator.API`, `LoadlyAggregator.Infrastructure`, FluentValidation, EF attributes, or JSON attributes. Column names/relations live in EF `Configurations/`.
+- Give collections a safe default: `= new List<Address>();`.
+- Enums are stored as their underlying int via the entity configuration; keep the property as the enum type.
+- Keep foreign-key id properties (`CompanyId`) **and** a navigation property only when a relationship is actively used in queries.
+
+## Example
+
+```csharp
+public class Admin : BaseEntity, IAuthenticatable
+{
+    public string FullName { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public AdminType Type { get; set; }
+    public UserStatus Status { get; set; }
+    public CommunicationChannel MfaChannel { get; set; }
+
+    public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public ICollection<Address> Addresses { get; set; } = new List<Address>();
+}
+```
+
+## Soft delete
+
+- Never add a bool `IsDeleted` column — the base class exposes `IsDeleted => DeletedAt != null`.
+- Hard-deletes are not allowed via the repository; use `Remove()` which sets `DeletedAt`.
+- Query results exclude soft-deleted rows automatically; pass `includeDeleted: true` only when explicitly needed.

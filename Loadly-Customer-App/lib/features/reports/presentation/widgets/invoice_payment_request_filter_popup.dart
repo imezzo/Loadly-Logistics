@@ -1,0 +1,663 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_primary_button.dart';
+import '../../../../core/widgets/app_secondary_button.dart';
+import '../../../../l10n/gen/app_localizations.dart';
+import '../../../trips/domain/entities/lookup.dart';
+
+// ignore: must_be_immutable
+class InvoicePaymentRequestFilterPopup extends StatefulWidget {
+  DateTime? startDate;
+  DateTime? endDate;
+  int? status;
+  int? invoiceId;
+
+  final void Function(String?, String?, int?, int?) fliter;
+  InvoicePaymentRequestFilterPopup({
+    super.key,
+    required this.startDate,
+    required this.endDate,
+    required this.status,
+    required this.invoiceId,
+    required this.fliter,
+  });
+
+  @override
+  State<InvoicePaymentRequestFilterPopup> createState() =>
+      _InvoicePaymentRequestFilterPopupState();
+}
+
+class _InvoicePaymentRequestFilterPopupState
+    extends State<InvoicePaymentRequestFilterPopup> {
+  final _invoiceController = TextEditingController();
+
+  @override
+  void initState() {
+    if (widget.invoiceId != null) {
+      _invoiceController.text = widget.invoiceId.toString();
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _invoiceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.darkGray.withValues(alpha: 0.4),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: const BoxDecoration(
+                  color: AppColors.mainGray,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.filter,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.darkGray,
+                      ),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(context),
+                      child: const Icon(
+                        CupertinoIcons.xmark,
+                        size: 15,
+                        color: AppColors.darkGray,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Date Range
+                    Text(
+                      l10n.dateRange,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.darkGray,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildDateField(
+                            context,
+                            widget.startDate,
+                            true,
+                            (newDate) =>
+                                setState(() => widget.startDate = newDate),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildDateField(
+                            context,
+                            widget.endDate,
+                            false,
+                            (newDate) =>
+                                setState(() => widget.endDate = newDate),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Trip Status
+                    Text(
+                      l10n.status,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.darkGray,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    StatusField(
+                      status: widget.status,
+                      onChanged: (status) =>
+                          setState(() => widget.status = status),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Vehicle Type
+                    Text(
+                      l10n.invoiceId,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.darkGray,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    InvoiceField(
+                      controller: _invoiceController,
+                      isInt: true,
+                      onChanged: (value) =>
+                          widget.invoiceId = int.parse(value.trim()),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Footer Buttons
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: AppColors.lightGray, width: 0.5),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: AppSecondaryButton(
+                        onPressed: () {
+                          setState(() {
+                            widget.startDate = null;
+                            widget.endDate = null;
+                            widget.status = null;
+                            widget.invoiceId = null;
+                            _invoiceController.text = '';
+                          });
+                        },
+                        label: l10n.reset,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppPrimaryButton(
+                        onPressed: () {
+                          widget.fliter(
+                            widget.startDate?.toUtc().toIso8601String(),
+                            widget.endDate?.toUtc().toIso8601String(),
+                            widget.status,
+                            widget.invoiceId,
+                          );
+                          Navigator.pop(context);
+                        },
+                        label: l10n.applyNow,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateField(
+    BuildContext context,
+    DateTime? date,
+    bool isStart,
+    Function(DateTime) onDateChanged,
+  ) {
+    return GestureDetector(
+      onTap: () => _showDatePicker(context, date, onDateChanged, isStart),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.lightGray),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              date == null
+                  ? isStart
+                        ? AppLocalizations.of(context)!.startDate
+                        : AppLocalizations.of(context)!.endDate
+                  : '${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month)} ${date.year.toString().substring(2)}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: AppColors.darkGray,
+              ),
+            ),
+            const Icon(
+              CupertinoIcons.calendar,
+              size: 20,
+              color: AppColors.darkGray,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDatePicker(
+    BuildContext context,
+    DateTime? date,
+    Function(DateTime) onDateChanged,
+    bool isStart,
+  ) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => Container(
+        height: 250,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              height: 44,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () {
+                      if (date == null) {
+                        onDateChanged(DateTime.now());
+                      }
+                      Navigator.pop(context);
+                    },
+                    child: Text(AppLocalizations.of(context)!.done),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: isStart
+                    ? widget.startDate ?? DateTime.now()
+                    : widget.endDate ?? DateTime.now(),
+                onDateTimeChanged: (dateTime) {
+                  date = dateTime;
+                  onDateChanged(dateTime);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[month - 1];
+  }
+}
+
+class Status {
+  String name;
+  int? code;
+  Color color;
+  IconData icon;
+
+  Status({
+    required this.name,
+    required this.code,
+    required this.color,
+    required this.icon,
+  });
+}
+
+// ignore: must_be_immutable
+class StatusField extends StatelessWidget {
+  int? status;
+  final Function(int?) onChanged;
+  StatusField({super.key, required this.status, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Status> statuses = [
+      Status(
+        name: AppLocalizations.of(context)!.all,
+        code: null,
+        color: CupertinoColors.activeBlue,
+        icon: CupertinoIcons.infinite,
+      ),
+      Status(
+        name: AppLocalizations.of(context)!.pending,
+        code: 1,
+        color: CupertinoColors.activeOrange,
+        icon: CupertinoIcons.slowmo,
+      ),
+      Status(
+        name: AppLocalizations.of(context)!.received,
+        code: 2,
+        color: CupertinoColors.activeGreen,
+        icon: CupertinoIcons.checkmark_alt,
+      ),
+      Status(
+        name: AppLocalizations.of(context)!.rejected,
+        code: 3,
+        color: CupertinoColors.systemRed,
+        icon: CupertinoIcons.xmark,
+      ),
+    ];
+    final FixedExtentScrollController controller = FixedExtentScrollController(
+      initialItem: statuses.indexOf(
+        statuses.firstWhere((statuses) => statuses.code == status),
+      ),
+    );
+    final statusItem = statuses.firstWhere(
+      (statuses) => statuses.code == status,
+    );
+    return GestureDetector(
+      onTap: () => showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context) => Container(
+          height: 250,
+          decoration: const BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 44,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(AppLocalizations.of(context)!.done),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoPicker(
+                  scrollController: controller,
+                  itemExtent: 40,
+                  onSelectedItemChanged: (index) =>
+                      onChanged(statuses[index].code),
+                  children: statuses
+                      .map((status) => Center(child: Text(status.name)))
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.lightGray),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(statusItem.icon, size: 18, color: statusItem.color),
+                const SizedBox(width: 8),
+                Text(
+                  statusItem.name,
+                  style: TextStyle(fontSize: 15, color: statusItem.color),
+                ),
+              ],
+            ),
+            const Icon(
+              CupertinoIcons.chevron_down,
+              size: 18,
+              color: AppColors.darkGray,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class ContractField extends StatelessWidget {
+  final List<Lookup> contracts;
+  int? contractId;
+  final Function(int) onChanged;
+  final bool isLoading;
+  ContractField({
+    super.key,
+    required this.contracts,
+    required this.onChanged,
+    required this.isLoading,
+    required this.contractId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final FixedExtentScrollController controller = FixedExtentScrollController(
+      initialItem: contractId == null || contracts.isEmpty
+          ? 0
+          : contracts.indexOf(
+              contracts.firstWhere((contract) => contract.id == contractId),
+            ),
+    );
+    return GestureDetector(
+      onTap: () => showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context) => Container(
+          height: 250,
+          decoration: const BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 44,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        if (contractId == null && contracts.isNotEmpty) {
+                          onChanged(contracts[0].id!);
+                        }
+                        Navigator.pop(context);
+                      },
+                      child: Text(AppLocalizations.of(context)!.done),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoPicker(
+                  scrollController: controller,
+                  itemExtent: 40,
+                  onSelectedItemChanged: (index) {
+                    contractId = contracts[index].id!;
+                    onChanged(contracts[index].id!);
+                  },
+                  children: contracts
+                      .map((contract) => Center(child: Text(contract.value!)))
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.lightGray),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              contractId == null
+                  ? AppLocalizations.of(context)!.all
+                  : contracts
+                        .firstWhere((element) => element.id == contractId)
+                        .value!,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: AppColors.darkGray,
+              ),
+            ),
+            isLoading
+                ? const CupertinoActivityIndicator(
+                    color: AppColors.mainBlue,
+                    radius: 10,
+                  )
+                : const Icon(
+                    CupertinoIcons.chevron_down,
+                    size: 18,
+                    color: AppColors.darkGray,
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class InvoiceField extends StatefulWidget {
+  final TextEditingController? controller;
+  final bool isInt;
+  final bool isDouble;
+  final Widget? prefix;
+  final Widget? suffix;
+  final String? placeholder;
+  final int? maxLines;
+  final bool enabled;
+  final ValueChanged<String>? onChanged;
+
+  const InvoiceField({
+    super.key,
+    this.controller,
+    this.prefix,
+    this.suffix,
+    this.placeholder,
+    this.maxLines,
+    this.onChanged,
+    this.enabled = true,
+    this.isInt = false,
+    this.isDouble = false,
+  });
+
+  @override
+  State<InvoiceField> createState() => _InvoiceFieldState();
+}
+
+class _InvoiceFieldState extends State<InvoiceField> {
+  @override
+  void dispose() {
+    widget.controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: widget.enabled ? AppColors.white : AppColors.mainGray,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.lightGray),
+      ),
+      child: CupertinoTextField(
+        controller: widget.controller,
+        placeholder: widget.placeholder,
+        keyboardType: widget.isInt || widget.isDouble
+            ? const TextInputType.numberWithOptions(decimal: true)
+            : TextInputType.text,
+        style: const TextStyle(color: CupertinoColors.black),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        onChanged: widget.onChanged,
+        enabled: widget.enabled,
+        maxLines: widget.maxLines,
+        decoration: null,
+        prefix: widget.prefix,
+        suffix: widget.suffix,
+        onTapOutside: (event) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        inputFormatters: widget.isDouble
+            ? [
+                FilteringTextInputFormatter.allow(
+                  RegExp(
+                    r'^\d+\.?\d*',
+                  ), // Allows digits and optional decimal point
+                ),
+                TextInputFormatter.withFunction((oldValue, newValue) {
+                  // Prevent multiple decimal points
+                  if (newValue.text.contains('.') &&
+                      newValue.text.indexOf('.') !=
+                          newValue.text.lastIndexOf('.')) {
+                    return oldValue;
+                  }
+                  return newValue;
+                }),
+              ]
+            : widget.isInt
+            ? [FilteringTextInputFormatter.digitsOnly]
+            : [],
+      ),
+    );
+  }
+}

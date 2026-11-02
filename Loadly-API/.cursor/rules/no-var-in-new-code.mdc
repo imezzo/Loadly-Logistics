@@ -1,0 +1,51 @@
+---
+description: Newly added C# must use explicit types; `var` is banned except for LINQ projections to anonymous types
+alwaysApply: true
+---
+
+# No `var` in new C# code
+
+New or modified C# code must declare variables with their explicit type. The **only** allowed use of `var` is a LINQ projection whose element type is anonymous, because the compiler requires it there.
+
+This supersedes the softer guideline in `loadly-aggregator-architecture` → "C# style".
+
+## Hard rules
+
+- ❌ Do NOT use `var` in local variable declarations in new code — this includes `new T()` right-hand sides, factory and async calls, `foreach`, `using`, tuple deconstruction, `out var`, and pattern-matching declarations.
+- ✅ Allowed exception: LINQ projection to an anonymous type.
+
+  ```csharp
+  var summary = contracts
+      .Select(c => new { c.Id, c.Name, Total = c.Trips.Count })
+      .ToList();
+  ```
+
+  The moment the projection returns a nameable type, use that type on the LHS.
+
+## Examples
+
+```csharp
+// ❌ bad
+var admin = await _adminRepository.GetByIdAsync(id);
+var list = new List<AdminDto>();
+foreach (var trip in trips) { ... }
+if (int.TryParse(raw, out var value)) { ... }
+var (a, b) = tuple;
+await using var scope = _scopeFactory.Create();
+
+// ✅ good
+Admin? admin = await _adminRepository.GetByIdAsync(id);
+List<AdminDto> list = new();                 // target-typed `new` is fine — LHS is explicit
+foreach (Trip trip in trips) { ... }
+if (int.TryParse(raw, out int value)) { ... }
+(int a, string b) = tuple;
+await using IServiceScope scope = _scopeFactory.Create();
+```
+
+## Why
+
+Explicit types make reviews and diffs self-explanatory, prevent silent return-type changes from rippling through callers, and keep our Clean Architecture layer boundaries legible without jumping to definitions.
+
+## Scope
+
+Applies to any new or modified `.cs` file across API, Domain, Infrastructure, Shared, and Tests. Pre-existing `var` in untouched code is grandfathered — do not do drive-by rewrites. Only rewrite `var` on lines you are already changing for another reason.

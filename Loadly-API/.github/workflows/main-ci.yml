@@ -1,0 +1,481 @@
+name: Prod Build and Push Docker Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+# One production run at a time. Never cancel an in-flight prod deploy;
+concurrency:
+  group: main-ci
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  Prod-build:
+    name: Main (Build-Push)
+    environment: main
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.3.0
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4.6.0
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME_LOADLY }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN_LOADLY }}
+
+      - name: Set environment variables for Production
+        env:
+          ASPNETCORE_ENVIRONMENT: ${{ vars.ASPNETCORE_ENVIRONMENT }}
+          ASPNETCORE_URLS: ${{ vars.ASPNETCORE_URLS }}
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+          DB_LOGS_CONNECTION_STRING: ${{ secrets.DB_LOGS_CONNECTION_STRING }}
+          REDIS_CONNECTION_STRING: ${{ secrets.REDIS_CONNECTION_STRING }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWT_ISSUER: ${{ vars.JWT_ISSUER }}
+          JWT_AUDIENCE: ${{ vars.JWT_AUDIENCE }}
+          JWT_EXPIRATION_MINUTES: ${{ vars.JWT_EXPIRATION_MINUTES }}
+          SMTP_HOST: ${{ vars.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
+          SMTP_USERNAME: ${{ vars.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM_EMAIL: ${{ vars.SMTP_FROM_EMAIL }}
+          SMTP_FROM_NAME: ${{ vars.SMTP_FROM_NAME }}
+          SMTP_ENABLE_SSL: ${{ vars.SMTP_ENABLE_SSL }}
+          SMTP_USE_DEFAULT_CREDENTIALS: ${{ vars.SMTP_USE_DEFAULT_CREDENTIALS }}
+          SMS_PROVIDER: ${{ vars.SMS_PROVIDER }}
+          AKEDLY_API_KEY: ${{ secrets.AKEDLY_API_KEY }}
+          AKEDLY_PIPELINE_ID: ${{ secrets.AKEDLY_PIPELINE_ID }}
+          AKEDLY_API_URL: ${{ vars.AKEDLY_API_URL }}
+          VICTORY_LINK_USERNAME: ${{ secrets.VICTORY_LINK_USERNAME }}
+          VICTORY_LINK_PASSWORD: ${{ secrets.VICTORY_LINK_PASSWORD }}
+          VICTORY_LINK_SENDER_NAME: ${{ vars.VICTORY_LINK_SENDER_NAME }}
+          VICTORY_LINK_API_URL: ${{ vars.VICTORY_LINK_API_URL }}
+          ULTRAMSG_TOKEN: ${{ secrets.ULTRAMSG_TOKEN }}
+          ULTRAMSG_INSTANCE_ID: ${{ secrets.ULTRAMSG_INSTANCE_ID }}
+          STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER }}
+          CDN_DOMAIN: ${{ vars.CDN_DOMAIN }}
+          CDN_MAIN_FOLDER: ${{ vars.CDN_MAIN_FOLDER }}
+          STORAGE_PATH: ${{ vars.STORAGE_PATH }}
+          AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_CDN_DOMAIN: ${{ vars.AWS_CDN_DOMAIN }}
+          ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
+          ROLLBAR_ENVIRONMENT: ${{ vars.ROLLBAR_ENVIRONMENT }}
+          LOG_LEVEL_DEFAULT: ${{ vars.LOG_LEVEL_DEFAULT }}
+          LOG_LEVEL_ASPNETCORE: ${{ vars.LOG_LEVEL_ASPNETCORE }}
+          ADMINURL: ${{ vars.ADMINURL || 'https://admin.loadly-eg.com' }}
+          DRIVERURL: ${{ vars.DRIVERURL || 'https://app.loadly-eg.com' }}
+          COMPANYURL: ${{ vars.COMPANYURL || 'https://company.loadly-eg.com' }}
+          CONTRACTORURL: ${{ vars.CONTRACTORURL || 'https://contractor.loadly-eg.com' }}
+          COLLECTORURL: ${{ vars.COLLECTORURL || 'https://admin.loadly-eg.com' }}
+          CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS }}
+          SEQ_SERVER_URL: ${{ vars.SEQ_SERVER_URL }}
+          SEQ_API_KEY: ${{ secrets.SEQ_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_PROD }}
+          OPENAI_ORGANIZATION: ${{ secrets.OPENAI_ORGANIZATION_PROD }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL_PROD || 'gpt-4o' }}
+          ODOMETER_OCR_PROVIDER: ${{ vars.ODOMETER_OCR_PROVIDER_PROD || 'openai' }}
+          EGYPT_WINDOWS_TIME_ZONE_ID: ${{ vars.EGYPT_WINDOWS_TIME_ZONE_ID || 'Egypt Standard Time' }}
+          EGYPT_IANA_TIME_ZONE_ID: ${{ vars.EGYPT_IANA_TIME_ZONE_ID || 'Africa/Cairo' }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_DEFAULT_COUNTRY_CODE: ${{ vars.GOOGLE_MAPS_DEFAULT_COUNTRY_CODE || 'EG' }}
+          BROADCAST_SHARE_PUBLIC_BASE_URL: ${{ vars.BROADCAST_SHARE_PUBLIC_BASE_URL || 'https://admin.loadly-eg.com/brdcst' }}
+
+        run: |
+          # Create Firebase credentials file from secret
+          echo '${{ secrets.FIREBASE_CREDENTIALS_JSON }}' > firebase-credentials.json
+
+          # Replace placeholders in main appsettings.json for Production
+          envsubst < LoadlyAggregator.API/appsettings.ci.json > LoadlyAggregator.API/appsettings.tmp
+          rm -rf LoadlyAggregator.API/appsettings.json || true
+          mv LoadlyAggregator.API/appsettings.tmp LoadlyAggregator.API/appsettings.json
+          rm -rf LoadlyAggregator.API/appsettings.ci.json || true
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v7.3.0
+        env:
+          DOCKER_CLIENT_TIMEOUT: 300
+          COMPOSE_HTTP_TIMEOUT: 300
+        with:
+          context: .
+          push: true
+          build-args: |
+            APP_ENV=production
+            VERSION=${{ github.run_number }}
+          cache-from: type=gha,scope=production
+          cache-to: type=gha,mode=max,scope=production
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ github.run_number }}
+          tags: |
+            loadlyeg/shayyal-api-agg:latest
+            loadlyeg/shayyal-api-agg:${{ github.run_number }}
+
+      - name: Publish image details
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          {
+            echo "### Production image"
+            echo
+            echo "- Tag: \`loadlyeg/shayyal-api-agg:${{ github.run_number }}\`"
+            echo "- Digest: \`${IMAGE_DIGEST}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  Deploy-main:
+    name: Main-Deploy
+    environment: main
+    needs: Prod-build
+    runs-on: ubuntu-26.04
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    env:
+      USER: ubuntu
+      HOST: 52.50.217.111
+      STACK_DIR: /root/loadlyeg/swarm/shayyal-api
+      # Full Swarm service name (<stack>_<service>) as shown by `docker service ls`.
+      SERVICE: ${{ vars.SWARM_SERVICE_NAME }}
+
+    steps:
+      - name: Checkout Repository
+        id: checkout_repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
+
+      - name: SSH Connect & Execute Commands
+        id: deploy
+        env:
+          USER: ubuntu
+          HOST: 52.50.217.111
+          # HEALTH_CHECK_URL: ${{ vars.HEALTH_CHECK_URL || 'http://127.0.0.1:8080/health' }}
+        run: |
+          if [ -z "$SERVICE" ]; then
+            echo "::error::vars.SWARM_SERVICE_NAME is not set on the 'main' environment"
+            exit 1
+          fi
+
+          # Use the manager's clock so log filtering is not affected by runner clock skew.
+          DEPLOY_STARTED_AT=$(ssh -o StrictHostKeyChecking=no ${USER}@${HOST} "date -u +%Y-%m-%dT%H:%M:%SZ")
+          echo "deploy_started_at=${DEPLOY_STARTED_AT}" >> "$GITHUB_OUTPUT"
+
+          ssh -o StrictHostKeyChecking=no ${USER}@${HOST} \
+          "sudo su -c 'cd ${STACK_DIR} && ./shayyal-api.sh ${{ github.run_number }}'"
+
+          # echo "Waiting for ${HEALTH_CHECK_URL} to become healthy..."
+          # for i in $(seq 1 36); do
+          #   if ssh -o StrictHostKeyChecking=no ${USER}@${HOST} "curl -sf '${HEALTH_CHECK_URL}' >/dev/null"; then
+          #     echo "Deploy health check passed"
+          #     exit 0
+          #   fi
+          #   echo "Attempt ${i}/36: not healthy yet, retrying in 5s..."
+          #   sleep 5
+          # done
+          # echo "Deploy health check failed after 3 minutes"
+          # exit 1
+
+      # - name: SSH Connect & Execute Commands
+      #   id: deploy
+      #   # HEALTH_CHECK_URL: ${{ vars.HEALTH_CHECK_URL || 'http://127.0.0.1:8080/health' }}
+      #   run: |
+      #     if [ -z "$SERVICE" ]; then
+      #       echo "::error::vars.SWARM_SERVICE_NAME is not set on the 'main' environment"
+      #       exit 1
+      #     fi
+
+      #     # Use the manager's clock so log filtering is not affected by runner clock skew.
+      #     DEPLOY_STARTED_AT=$(ssh -o StrictHostKeyChecking=no ${USER}@${HOST} "date -u +%Y-%m-%dT%H:%M:%SZ")
+      #     echo "deploy_started_at=${DEPLOY_STARTED_AT}" >> "$GITHUB_OUTPUT"
+
+      #     ssh -o StrictHostKeyChecking=no ${USER}@${HOST} \
+      #     "sudo su -c 'cd ${STACK_DIR} && ./shayyal-api.sh ${{ github.run_number }}'"
+
+      #     # echo "Waiting for ${HEALTH_CHECK_URL} to become healthy..."
+      #     # for i in $(seq 1 36); do
+      #     #   if ssh -o StrictHostKeyChecking=no ${USER}@${HOST} "curl -sf '${HEALTH_CHECK_URL}' >/dev/null"; then
+      #     #     echo "Deploy health check passed"
+      #     #     exit 0
+      #     #   fi
+      #     #   echo "Attempt ${i}/36: not healthy yet, retrying in 5s..."
+      #     #   sleep 5
+      #     # done
+      #     # echo "Deploy health check failed after 3 minutes"
+      #     # exit 1
+
+      - name: Verify Migration Applied
+        id: verify_migration
+        env:
+          SINCE: ${{ steps.deploy.outputs.deploy_started_at }}
+        run: |
+          if [ -z "$SERVICE" ] || [ -z "$SINCE" ]; then
+            echo "::error::SERVICE ('${SERVICE}') or SINCE ('${SINCE}') is empty - cannot watch migration logs"
+            exit 1
+          fi
+
+          set +e
+          ssh -o StrictHostKeyChecking=no ${USER}@${HOST} bash -s <<EOF
+          set -e
+          echo "Watching ${SERVICE} service logs since ${SINCE} for migration status..."
+          for i in \$(seq 1 60); do
+            LOG=\$(sudo docker service logs --raw --since "${SINCE}" ${SERVICE} 2>&1 || true)
+
+            if echo "\$LOG" | grep -q "MIGRATION_FAILURE"; then
+              echo "::error::Migration FAILED on production - dotnet ef output:"
+              echo "\$LOG" | grep -B2 -A 20 "MIGRATION_FAILURE"
+              exit 2
+            fi
+
+            if echo "\$LOG" | grep -q "MIGRATION_SUCCESS"; then
+              echo "Migration applied successfully on production"
+              exit 0
+            fi
+
+            echo "Attempt \$i/60: migration status not yet available, retrying in 5s..."
+            sleep 5
+          done
+
+          echo "::error::Timed out waiting for migration status - treating as failure"
+          echo "Service tasks:"
+          sudo docker service ps --no-trunc ${SERVICE} | head -10
+          echo "Last logs from ${SERVICE}:"
+          echo "\$LOG" | tail -50
+          exit 1
+          EOF
+          STATUS=$?
+          set -e
+
+          if [ "$STATUS" -eq 2 ]; then
+            echo "migration_failed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "migration_failed=false" >> "$GITHUB_OUTPUT"
+          fi
+          exit $STATUS
+
+      # - name: Rollback to previous service spec on migration failure
+      #   if: failure() && steps.verify_migration.outputs.migration_failed == 'true'
+      #   run: |
+      #     # Swarm keeps the previous service spec, so no image tag needs to be captured.
+      #     echo "::error::Migration failed on the new deploy - rolling back ${SERVICE} to its previous spec"
+      #     ssh -o StrictHostKeyChecking=no ${USER}@${HOST} \
+      #       "sudo docker service rollback ${SERVICE} && sudo docker service inspect -f '{{.Spec.TaskTemplate.ContainerSpec.Image}}' ${SERVICE}"
+      #     echo "::error::Rolled back production service ${SERVICE} after migration failure on the new deploy"
+
+  Notify-teams:
+    name: Notify Teams
+    needs: [Prod-build, Deploy-main]
+    if: always()
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Post build and deploy status
+        env:
+          WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          BUILD_STATUS: ${{ needs.Prod-build.result }}
+          DEPLOY_STATUS: ${{ needs.Deploy-main.result }}
+          IMAGE_TAG: ${{ github.run_number }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "TEAMS_WEBHOOK_URL empty — skip notify"
+            exit 0
+          fi
+
+          notify() {
+            local ENVIRONMENT="$1"
+            local PHASE="$2"
+            local JOB_STATUS="$3"
+
+            local CONTAINER_STYLE STATUS_COLOR STATUS_EMOJI STATUS_LABEL PHASE_EMOJI
+            case "$JOB_STATUS" in
+              success)
+                CONTAINER_STYLE="good"
+                STATUS_COLOR="good"
+                STATUS_EMOJI="✅"
+                STATUS_LABEL="Succeeded"
+                ;;
+              failure)
+                CONTAINER_STYLE="attention"
+                STATUS_COLOR="attention"
+                STATUS_EMOJI="❌"
+                STATUS_LABEL="Failed"
+                ;;
+              cancelled)
+                CONTAINER_STYLE="warning"
+                STATUS_COLOR="warning"
+                STATUS_EMOJI="⚠️"
+                STATUS_LABEL="Cancelled"
+                ;;
+              skipped)
+                CONTAINER_STYLE="emphasis"
+                STATUS_COLOR="default"
+                STATUS_EMOJI="⏭️"
+                STATUS_LABEL="Skipped"
+                ;;
+              *)
+                CONTAINER_STYLE="accent"
+                STATUS_COLOR="accent"
+                STATUS_EMOJI="ℹ️"
+                STATUS_LABEL="$JOB_STATUS"
+                ;;
+            esac
+
+            case "$PHASE" in
+              Build) PHASE_EMOJI="🏗️" ;;
+              Deploy) PHASE_EMOJI="🚀" ;;
+              *) PHASE_EMOJI="📦" ;;
+            esac
+
+            local SHORT_SHA="${SHA:0:7}"
+            local TIME
+            TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            local TITLE="${STATUS_EMOJI}  ${ENVIRONMENT^} ${PHASE}: ${STATUS_LABEL}"
+            local ENV_LABEL="${ENVIRONMENT^}"
+
+            local PAYLOAD
+            PAYLOAD=$(jq -n \
+              --arg title "$TITLE" \
+              --arg repo "$REPO" \
+              --arg env "$ENV_LABEL" \
+              --arg phase "${PHASE_EMOJI} ${PHASE}" \
+              --arg status "${STATUS_EMOJI} ${STATUS_LABEL}" \
+              --arg status_color "$STATUS_COLOR" \
+              --arg container_style "$CONTAINER_STYLE" \
+              --arg branch "$REF_NAME" \
+              --arg commit "$SHORT_SHA" \
+              --arg actor "$ACTOR" \
+              --arg run "#${RUN_NUMBER}" \
+              --arg tag "$IMAGE_TAG" \
+              --arg time "$TIME" \
+              --arg run_url "$RUN_URL" \
+              '{
+                "type": "message",
+                "attachments": [{
+                  "contentType": "application/vnd.microsoft.card.adaptive",
+                  "contentUrl": null,
+                  "content": {
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "type": "AdaptiveCard",
+                    "version": "1.4",
+                    "msteams": { "width": "Full" },
+                    "body": [
+                      {
+                        "type": "Container",
+                        "style": $container_style,
+                        "bleed": true,
+                        "items": [
+                          {
+                            "type": "TextBlock",
+                            "text": $title,
+                            "weight": "Bolder",
+                            "size": "Large",
+                            "wrap": true,
+                            "color": "Light"
+                          },
+                          {
+                            "type": "TextBlock",
+                            "text": $repo,
+                            "size": "Medium",
+                            "weight": "Bolder",
+                            "wrap": true,
+                            "spacing": "Small",
+                            "color": "Light"
+                          },
+                          {
+                            "type": "TextBlock",
+                            "text": $time,
+                            "size": "Small",
+                            "isSubtle": true,
+                            "spacing": "None",
+                            "color": "Light"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Container",
+                        "spacing": "Medium",
+                        "items": [
+                          {
+                            "type": "ColumnSet",
+                            "columns": [
+                              {
+                                "type": "Column",
+                                "width": "stretch",
+                                "items": [
+                                  {"type": "TextBlock", "text": "ENVIRONMENT", "size": "Small", "isSubtle": true, "spacing": "None"},
+                                  {"type": "TextBlock", "text": $env, "weight": "Bolder", "size": "Medium", "spacing": "None", "wrap": true}
+                                ]
+                              },
+                              {
+                                "type": "Column",
+                                "width": "stretch",
+                                "items": [
+                                  {"type": "TextBlock", "text": "PHASE", "size": "Small", "isSubtle": true, "spacing": "None"},
+                                  {"type": "TextBlock", "text": $phase, "weight": "Bolder", "size": "Medium", "spacing": "None", "wrap": true}
+                                ]
+                              },
+                              {
+                                "type": "Column",
+                                "width": "stretch",
+                                "items": [
+                                  {"type": "TextBlock", "text": "STATUS", "size": "Small", "isSubtle": true, "spacing": "None"},
+                                  {"type": "TextBlock", "text": $status, "weight": "Bolder", "size": "Medium", "spacing": "None", "wrap": true, "color": $status_color}
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "FactSet",
+                            "spacing": "Medium",
+                            "facts": [
+                              {"title": "Branch", "value": $branch},
+                              {"title": "Commit", "value": $commit},
+                              {"title": "Triggered by", "value": $actor},
+                              {"title": "Run", "value": $run},
+                              {"title": "Image tag", "value": $tag}
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "Action.OpenUrl",
+                        "title": "🔗  View workflow run",
+                        "url": $run_url,
+                        "style": "positive"
+                      }
+                    ]
+                  }
+                }]
+              }')
+
+            curl --fail --silent --show-error \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD" \
+              "$WEBHOOK_URL"
+            echo "Teams notify sent: ${TITLE}"
+          }
+
+          notify "production" "Build" "$BUILD_STATUS"
+          if [ "$DEPLOY_STATUS" != "skipped" ]; then
+            notify "production" "Deploy" "$DEPLOY_STATUS"
+          fi

@@ -1,0 +1,41 @@
+---
+description: List actions — use a BaseFilterUtility instead of if-chains, thin ListXAction, declarative filters
+globs: LoadlyAggregator.Domain/**/Actions/**/List*Action.cs,LoadlyAggregator.Infrastructure/Helpers/Filters/**/*.cs,LoadlyAggregator.Domain/**/Filters/**/*.cs
+alwaysApply: false
+---
+
+# List endpoints & filtering
+
+Any `ListXAction` with more than one or two optional filters uses the **Filter Utility pattern** (see `Documentation/FILTER_UTILITY_PATTERN.md`), not a chain of `if (request.X != null) query = query.Where(...)`.
+
+## Rules
+
+- Create one `XFilterUtility : BaseFilterUtility<X>` per entity. Register filters declaratively in `GetFilters()`.
+- Compose filters from the shared building blocks:
+  - `SearchFilter<T>(e => e.NameEn, e => e.NameAr ?? "")` — multi-column text search.
+  - `EqualityFilter<T, TValue>("key", e => e.Prop)` — single equality on a query-string key.
+  - `InFilter<T, TValue>("key", e => e.Prop)` — array `?keys[]=...` → `WHERE Prop IN (...)`.
+  - `DateRangeFilter<T>(e => e.CreatedAt, httpAccessor, fromKey: "from", toKey: "to")`.
+- Keep the Action thin: `query = _filter.ApplyOnBuilder(query, request); // page + map`.
+- Register the filter utility in `ServiceCollectionExtensions` as `AddScoped<XFilterUtility>()`.
+- Filter *values* are validated in the `ListXRequest` validator (bounds, enum ranges). Filters themselves should not throw.
+
+## Example (shape)
+
+```csharp
+public class ContractsFilterUtility(IHttpContextAccessor http) : BaseFilterUtility<Contract>(http)
+{
+    protected override IEnumerable<IFilter<Contract>> GetFilters() => new IFilter<Contract>[]
+    {
+        new SearchFilter<Contract>(c => c.NameEn, c => c.NameAr ?? ""),
+        new EqualityFilter<Contract, long>("companyId", c => c.CompanyId),
+        new InFilter<Contract, long>("companies", c => c.CompanyId),
+        new DateRangeFilter<Contract>(c => c.CreatedAt, HttpContextAccessor, "from", "to"),
+    };
+}
+```
+
+## When manual filtering is still OK
+
+- Filters that need repository-specific methods (joins, grouped counts, custom SQL expressions).
+- Complex business branches that genuinely do not fit the filter abstraction. Even then, keep that logic in a private method on the Action, not inline in `ExecuteAsync`.

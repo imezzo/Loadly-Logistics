@@ -1,0 +1,28 @@
+/* stylelint-disable import-notation */
+@import 'tailwindcss';
+
+@layer base {
+  @import "./base/fonts.css";
+  @import "./base/index.css";
+}
+
+@layer utilities {
+  @import "./utility.css";
+}
+
+@layer components {
+  @import "./layouts.css";
+  @import "./modules/button.css";
+  @import "./modules/checkbox.css";
+  @import "./modules/combobox.css";
+  @import "./modules/input.css";
+  @import "./modules/tab.css";
+  @import "./modules/select.css";
+  @import "./modules/pagination.css";
+}
+
+@import "./theme.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant en (&:where([lang=en], [lang=en] *));
+@custom-variant ar (&:where([lang=ar], [lang=ar] *));

@@ -1,0 +1,58 @@
+---
+description: Authorization — [Authorize] + [HasPermission(Request.Permission)], permission naming (verb_entity, singular), [HasAnyPermission] and [HasRole] usage
+globs: LoadlyAggregator.API/Controllers/**/*.cs,LoadlyAggregator.API/Requests/**/*.cs,LoadlyAggregator.Infrastructure/Authorization/**/*.cs
+alwaysApply: false
+---
+
+# Authorization
+
+Four attributes exist in `LoadlyAggregator.Infrastructure.Authorization`:
+
+| Attribute                | Use for                                                    |
+|--------------------------|------------------------------------------------------------|
+| `[Authorize]`            | Class-level: require an authenticated user. Always present on controllers that aren't public. |
+| `[HasPermission("p")]`   | Per-action: require **this specific permission** (standard case). |
+| `[HasAnyPermission(...)]`| Per-action: endpoint serves two closely-related permissions (e.g. upsert = create *or* update). |
+| `[HasRole("r")]`         | Per-action: coarse role check only when permission granularity doesn't fit. Prefer `[HasPermission]`. |
+| `[AllowAnonymous]`       | Public endpoints only (`AppVersion`, signed-URL downloads, auth entry points). |
+
+The permission filter supports user types `admin`, `company`, `driver`, `collector` — the JWT `userType` claim drives routing to the right table.
+
+## Permission naming — strict rules
+
+- Format: `verb_entity_in_snake_case`.
+- Entity is **singular**: `create_company`, `view_tag`, `delete_driver`, `edit_vehicle_insurance`, `view_contractor_payout`.
+- Verb comes from this vocabulary (extend only with team review):
+  - CRUD: `create_`, `view_`, `edit_`, `delete_` (prefer `edit_` over `update_`).
+  - Workflow: `activate_`, `deactivate_`, `cancel_`, `terminate_`, `import_`, `send_`, `upload_`, `download_`, `manage_`, `push_`, `self_complete_`.
+- One permission may be shared across multiple endpoints of the same workflow (`self_complete_trip` for all trip-lifecycle actions; `view_dashboard` for every dashboard GET).
+- Define the string **once**, as `public const string Permission = "verb_entity";` on the Request class. Controllers reference `RequestClass.Permission` only.
+
+## Usage pattern
+
+```csharp
+[ApiController]
+[Route("api/admin/invoices")]
+[Authorize]                                                   // class-level: require auth
+public class InvoicesController : ControllerBase
+{
+    [HttpPost]
+    [HasPermission(CreateInvoiceRequest.Permission)]          // = "create_invoice"
+    public async Task<ActionResult> Create([FromBody] CreateInvoiceRequest req) { ... }
+
+    [HttpPut("{contractId:long}/draft")]
+    [HasAnyPermission(                                        // true "upsert" endpoint
+        UpsertDraftContractBillingSnapshotRequest.Permission,
+        UpdateDraftContractBillingSnapshotRequest.Permission)]
+    public async Task<ActionResult> UpsertDraft(long contractId, ...) { ... }
+}
+```
+
+## Anti-patterns
+
+- ❌ Hardcoding a string: `[HasPermission("create_invoice")]` — always via `RequestClass.Permission`.
+- ❌ Plural entity: `create_admins`, `view_tags`. Use `create_admin`, `view_tag`. (Rare legacy plurals exist; don't propagate.)
+- ❌ Omitting `[HasPermission]` on an authenticated action — `[Authorize]` alone grants anyone with a valid token.
+- ❌ `[HasAnyPermission]` as a lazy shortcut when two unrelated endpoints happen to share handlers — split them or combine the permissions in the role config instead.
+- ❌ `[HasRole("admin")]` to gate CRUD on an entity — use the matching permission instead; roles are grants of permissions, not an auth primitive.
+- ❌ `[AllowAnonymous]` on anything that touches user data — reserve for truly public endpoints.

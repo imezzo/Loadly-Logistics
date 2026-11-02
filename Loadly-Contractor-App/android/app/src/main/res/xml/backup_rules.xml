@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Prevent session/auth and other app state from surviving uninstall + reinstall. -->
+    <exclude domain="sharedpref" path="." />
+</full-backup-content>

@@ -1,0 +1,614 @@
+# Loadly Project - Cursor Rules
+
+## Project Overview
+This is a Vue 3 + TypeScript multi-dashboard application with the following architecture:
+- **Frameworks**: Vue 3 (Composition API), TypeScript, Pinia, Vue Router, VeeValidate, Yup
+- **Styling**: Tailwind CSS v4
+- **Build Tool**: Vite
+- **Multi-Platform**: admin-dashboard, app-dashboard, company-dashboard
+
+## Project Structure
+
+### Directory Organization
+```
+src/
+├── assets/          # CSS, fonts, images, SVG
+│   ├── css/        # Base, components, fonts, theme, utility styles
+│   ├── fonts/      # Font files (ar/, en/)
+│   ├── images/     # Image assets
+│   └── svg/        # SVG assets
+├── components/     # Reusable Vue components (auto-imported)
+│   ├── base/       # Base form components (BaseInput, BaseSelect, BasePopup, etc.)
+│   ├── card/       # Card components (CardPreview, CardPreviewLabel, CardAnalyticsCounter)
+│   ├── icon/       # Icon components (IconUser, IconCheck, etc.)
+│   ├── navigation/ # Navigation components (NavigationMenu, NavigationTabs, NavigationItem)
+│   ├── popup/      # Popup components (PopupError, PopupSuccess, etc.)
+│   └── uploader/   # File upload components (Uploader, UploaderItem, etc.)
+├── composables/    # Reusable composition functions
+│   ├── admin-dashboard/  # Platform-specific composables
+│   └── ui/         # UI utilities (useSelectDropdown, etc.)
+├── layouts/        # Layout components organized by platform
+├── locale/         # i18n translation files (platform-specific: button, content, error, form, sidebar, success, table, title)
+├── router/         # Router configuration by platform
+│   └── {platform}/guards/  # Navigation and permission guards
+├── stores/         # Pinia stores organized by platform
+├── types/          # TypeScript type definitions
+│   ├── admin-dashboard/
+│   │   ├── request/   # Request type definitions
+│   │   └── response/  # Response type definitions
+│   ├── request/    # Shared request types
+│   └── response/   # Shared response types (pagination, lookup, enum)
+├── utils/          # Utility functions
+│   ├── api/        # API utilities and interceptors (platform-specific)
+│   └── validation/ # Validation utilities
+└── views/          # Page components organized by platform
+    └── errors/     # Shared error pages (NotFound, Unauthorized)
+```
+
+## Code Patterns & Conventions
+
+### Vue Components
+
+#### Component Structure
+- Always use `<script setup lang="ts">` for Vue components
+- Use `defineOptions({ inheritAttrs: false })` for base components that need to control attribute inheritance
+- Use TypeScript generics for `defineProps` and `defineEmits`:
+  ```typescript
+  const props = defineProps<{
+    formValues?: Record<string, unknown>
+    errors?: Record<string, string[]>
+  }>()
+  
+  const emit = defineEmits<{
+    update: [data: Record<string, unknown>]
+    next: []
+  }>()
+  ```
+- **CRITICAL - defineEmits Usage:**
+  - Only assign `defineEmits` to a variable (e.g., `const emit = defineEmits<...>()`) if you need to call `emit()` in the script section
+  - If you're only using `$emit()` in templates (inline emits), use `defineEmits<{...}>()` without assignment
+  - Example:
+    ```typescript
+    // ✅ CORRECT: No assignment when only using $emit() in template
+    defineEmits<{
+      setPage: [page: number]
+      nextPage: []
+    }>()
+    
+    // ✅ CORRECT: Assignment when calling emit() in script
+    const emit = defineEmits<{
+      update: [data: Record<string, unknown>]
+    }>()
+    
+    function handleUpdate() {
+      emit('update', data)
+    }
+    ```
+
+#### Component Naming
+- Use PascalCase for component names: `ContractInformation.vue`
+- Use kebab-case for component file names matching the component name
+- Base components should be prefixed with `Base`: `BaseInput.vue`, `BaseForm.vue`
+- Icon components should be prefixed with `Icon`: `IconUser.vue`, `IconCheck.vue`
+
+#### Template Patterns
+- Use Tailwind CSS classes for styling
+- Prefer composition over configuration when possible
+- Use slots for flexible component composition
+- Use `v-slot` with named slots for form field customization
+
+### TypeScript Conventions
+
+#### Type Definitions
+- Store types in appropriate directories:
+  - Request types: `src/types/{platform}/request/`
+  - Response types: `src/types/{platform}/response/`
+- Use interfaces for object shapes
+- Use type aliases for unions and complex types
+- Export adapters alongside types in the same file
+
+#### Naming Conventions
+- Functions: `camelCase` (enforced by ESLint)
+- Components: `PascalCase`
+- Constants: `UPPER_SNAKE_CASE` or `camelCase` depending on context
+- Types/Interfaces: `PascalCase`
+- Private functions can start with underscore: `_helperFunction`
+
+#### Type Adapters Pattern
+- Always create request adapters to transform frontend data to API format
+- Always create response adapters to transform API data to frontend format
+- Adapters should be exported from the same file as the types
+- Example:
+  ```typescript
+  export function companyCreateRequestAdapter(data: CompanyCreateRequest): FormData {
+    const formData = new FormData()
+    // transformation logic
+    return formData
+  }
+  
+  export function companyAdapter(company: ApiCompany): Company {
+    return {
+      // transformation logic
+    }
+  }
+  ```
+
+#### Handling Bilingual Content in Response Adapters
+- **CRITICAL**: When API responses contain bilingual fields (e.g., `nameEn`/`nameAr`, `descEn`/`descAr`), follow this pattern:
+  1. **API Interface**: Keep separate bilingual fields in the API interface (e.g., `ApiContractType`):
+     ```typescript
+     export interface ApiContractType {
+       nameEn: string
+       nameAr: string
+       descEn: string
+       descAr: string
+       // ... other fields
+     }
+     ```
+  2. **Frontend Interface**: Use single localized fields in the frontend interface (e.g., `ContractType`):
+     ```typescript
+     export interface ContractType {
+       name: string
+       description: string
+       // ... other fields (omit unnecessary fields like addedBy, createdAt, updatedAt if not needed)
+     }
+     ```
+  3. **Adapter Function**: Use `getLocalizedValue()` utility to combine bilingual fields:
+     ```typescript
+     export function contractTypeAdapter(data: ApiContractType): ContractType {
+       return {
+         id: data.id,
+         name: getLocalizedValue(data.nameEn, data.nameAr),
+         description: getLocalizedValue(data.descEn, data.descAr),
+         bestFor: getLocalizedValue(data.bestForEn, data.bestForAr),
+         status: data.status,
+         // Omit fields not needed in frontend (addedBy, createdAt, updatedAt, etc.)
+       }
+     }
+     ```
+  - **Benefits**:
+    - Cleaner frontend interfaces with single fields instead of duplicate bilingual fields
+    - Automatic language selection based on user's locale
+    - Removes unnecessary fields that aren't used in the UI
+    - Consistent pattern across all bilingual content
+  - **Response Property Naming**: Use concise property names in response interfaces (e.g., `types` instead of `contractTypes` when the context is clear)
+
+### Composables Pattern
+
+#### Structure
+- Composables should be in `src/composables/` or `src/composables/{platform}/`
+- Use the `use` prefix: `useCompanyInformation.ts`, `useVeeValidate.ts`
+- Export a single function that returns an object with all needed values/functions
+- Use `useVeeValidate()` when working with forms
+- Example:
+  ```typescript
+  export function useCompanyInformation() {
+    const { t } = useI18n()
+    const companyStore = useCompanyStore()
+    const { companiesListAsLookup } = storeToRefs(companyStore)
+    
+    useVeeValidate()
+    
+    // functions and computed values
+    
+    return {
+      companiesListAsLookup,
+      fieldsSchema,
+      initialValues,
+      validationSchema,
+    }
+  }
+  ```
+
+### Pinia Stores Pattern
+
+#### Store Structure
+- Stores should be in `src/stores/{platform}/`
+- Use `defineStore` with composition API syntax
+- Store reactive state with `ref` or `computed`
+- Use `storeToRefs` when destructuring reactive state from stores
+- API calls should use the `api` utility from `@/utils/api`
+- Always use request/response adapters in store methods
+- Example:
+  ```typescript
+  export const useCompanyStore = defineStore('company', () => {
+    const companiesList = ref<CompaniesListResponse | null>(null)
+    
+    async function getList(data: CompaniesListRequest) {
+      return api({
+        url: '/companies',
+        method: 'GET',
+        params: companiesListRequestAdapter(data),
+        responseAdapter: companiesListResponseAdapter,
+      })
+    }
+    
+    return {
+      companiesList,
+      getList,
+    }
+  })
+  ```
+
+### Router Patterns
+
+#### Route Organization
+- Routes are organized by domain in separate files: `companies.ts`, `users.ts`, `contracts.ts`, etc.
+- Each route file exports a `{feature}Routes` array
+- Import and combine in `src/router/admin-dashboard/index.ts`
+
+#### Route Configuration
+- Use layout wrapper: `component: () => import('@/layouts/defaultLayout.vue')`
+- Use lazy loading for views: `component: () => import('@/views/...')`
+- Route naming: `{Feature}List`, `Create{Feature}`, `Update{Feature}`
+- Route meta must include: `title`, `requiresAuth`, `module` (Permission.*), `permission` (Resource.Action)
+
+#### Route Meta
+```typescript
+meta: {
+  title: 'Companies',           // Used for document.title
+  requiresAuth: true,
+  module: Permission.Company,   // From @/types/admin-dashboard/response/permission-group
+  permission: Company.View,     // Resource-specific permission
+  isMfaStep?: boolean,         // For MFA flow routes
+}
+```
+
+#### Navigation Guards
+- Admin dashboard uses `navigationGuard` in `router.beforeEach`
+- Use `checkPermissionGuard(requiredPermission, requiredModule)` for permission checks
+- Unauthorized users redirect to `/errors/unauthorized`
+- Unauthenticated users redirect to `/auth/login`
+
+### Permission Pattern
+
+- Import `Permission` and resource constants from `@/types/admin-dashboard/response/permission-group`
+- Use `usePermission(module, permission)` composable for permission checks in components
+- Check `hasPermission` and `hasModule` for conditional UI (e.g., hide Create button)
+- Example: `const { hasCreatePermission } = usePermission(Permission.Company, Company.Create)`
+
+### Popup Pattern
+
+- Use `defineModel<boolean>('modelValue', { required: true })` for open/close state
+- Wrap content with `BasePopup` (or extend PopupError, PopupSuccess, etc.)
+- Use `v-model` for two-way binding: `v-model="isCreatePopupOpen"`
+- Popups use `Teleport to="body"` (handled by BasePopup)
+- For form popups: emit `@refresh` to parent to refetch data after success
+
+### List Page Pattern
+
+- Create `useList` composable in `composables/useList.ts`
+- Use `usePagination(paginationRef)` for pagination controls (setPage, nextPage, prevPage, updateItemsPerPage)
+- Use `useLoading()` for loading state during fetch
+- Transform API pagination to unified format: `{ page, size, pages, items }` (see `Pagination` type)
+- Use `watch` on `currentPage` and `itemsPerPage` to trigger `fetch{C_resource}`
+- Return: `{ items, fetchItems, isLoading, pagination, setPage, nextPage, prevPage, updateItemsPerPage }`
+- List page structure: header with title + action button, table/cards, Create/Edit/Delete popups
+
+### Pagination Pattern
+
+- API returns `ApiPagination`: `{ page, pageSize, totalCount, totalPages }`
+- Frontend uses `Pagination`: `{ page, size, pages, items }`
+- Use `apiPaginationAdapter()` from `@/types/response/pagination` when needed
+- `usePagination()` accepts `Ref<Pagination | null>` or `ComputedRef<Pagination | null>`
+
+### API Patterns
+
+#### API Utility Usage
+- Always use the `api` utility from `@/utils/api`
+- Include `requestAdapter` for transforming request data
+- Include `responseAdapter` for transforming response data
+- Handle FormData appropriately (api utility handles it automatically)
+- Example:
+  ```typescript
+  return api({
+    url: '/companies',
+    method: 'POST',
+    data: companyCreateRequestAdapter(data),
+    responseAdapter: companyResponseAdapter,
+  })
+  ```
+
+#### Lookup API Pattern
+- **CRITICAL**: When adding new lookup endpoints (e.g., `/lookups/{resource}/default`), follow this pattern:
+  1. **Add to Lookup Store** (`src/stores/lookup.ts`):
+     - Add a `ref<LookupResponse>` for the lookup data (e.g., `const companies = ref<LookupResponse>({} as LookupResponse)`)
+     - Create a `get{Resource}` function that:
+       - Uses `API_BASE_URL + '/{resource}/default'`
+       - Accepts `LookupRequest` as parameter
+       - Uses `lookupRequestAdapter(params)` for request transformation
+       - Uses `lookupResponseAdapter` for response transformation (if API follows standard lookup format)
+       - Returns the API response
+     - Export the ref and function in the store return object
+  2. **Add to useLookups Composable** (`src/composables/useLookups.ts`):
+     - Add the ref to `storeToRefs` destructuring
+     - Create a `get{Resource}` function that calls the store method and updates the ref
+     - Export the ref and function in the composable return object
+  3. **Use in Components/Composables**:
+     - Always use `useLookups()` composable instead of directly accessing the lookup store
+     - Destructure the needed lookup data and functions: `const { companies, getCompanies } = useLookups()`
+     - Call the getter function when needed: `await getCompanies(page)`
+     - Access items via the ref: `companies.value?.items ?? []`
+  - **Example Implementation**:
+    ```typescript
+    // In lookup store
+    const companies = ref<LookupResponse>({} as LookupResponse)
+    
+    function getCompanies(params: LookupRequest) {
+      return api({
+        url: API_BASE_URL + '/companies/default',
+        method: 'GET',
+        params: lookupRequestAdapter(params),
+        responseAdapter: lookupResponseAdapter,
+      })
+    }
+    
+    // In useLookups composable
+    const { companies } = storeToRefs(lookupStore)
+    
+    async function getCompanies(page?: number): Promise<void> {
+      const { data } = await lookupStore.getCompanies({ page })
+      companies.value = data
+    }
+    
+    // In component/composable
+    const { companies, getCompanies } = useLookups()
+    await getCompanies(1)
+    const options = companies.value?.items ?? []
+    ```
+  - **Why this pattern?**
+    - Provides consistent interface across all lookups
+    - Centralizes lookup logic in one composable
+    - Makes it easy to add pagination, loading states, and other features
+    - Follows DRY principle by reusing `lookupRequestAdapter` and `lookupResponseAdapter`
+
+### Form Patterns
+
+#### Form Schema
+- Use the `Schema` and `FieldsGroup` interfaces from `@/types/form` for field definitions
+- Schema properties: `as`, `name`, `label`, `labelRequired`, `options`, `containerClass`, `fieldSlot`, `group`, etc.
+- Define `fieldsSchema` as a computed property
+- Use `BaseForm` component with schema-driven approach
+- Include validation schema using Yup
+- Example:
+  ```typescript
+  const validationSchema = object({
+    companyId: string().required(),
+    startDate: string().required(),
+  })
+  
+  const fieldsSchema = computed<Schema[]>(() => [
+    {
+      name: 'companyId',
+      as: 'BaseSelect',
+      options: companiesListAsLookup.value?.items ?? [],
+      label: t('form.selectCompany'),
+      labelRequired: true,
+      containerClass: 'w-full',
+    },
+  ])
+  ```
+
+#### Validation
+- Use Yup for validation schemas
+- Always call `useVeeValidate()` in composables that handle forms
+- Use custom validation utilities from `@/utils/validation/`
+- Validation messages should be internationalized via `t('validation.*')`
+
+### Styling Conventions
+
+#### Stylelint
+- Project uses Stylelint for CSS/Vue style linting (`stylelint.config.mjs`)
+- Supports Tailwind at-rules: `@theme`, `@custom-variant`, `@apply`, etc.
+- See `documentation/linters.md` for full configuration
+
+#### Tailwind CSS
+- Use Tailwind utility classes exclusively
+- Follow the project's Tailwind class ordering (enforced by ESLint)
+- Use responsive prefixes: `md:`, `lg:`, etc.
+- Use semantic color classes: `text-neutral-10`, `bg-error-600`, etc.
+- Common patterns:
+  - Input height: `h-11`
+  - Input border radius: `rounded-lg`
+  - Spacing: Use `gap-*`, `mt-*`, `mb-*`, `p-*` consistently
+  - Flexbox: `flex`, `flex-col`, `items-center`, `justify-between`
+
+#### Component Styling
+- Use `scoped` styles when needed
+- Prefer Tailwind classes over custom CSS
+- Use CSS variables for theme values when appropriate
+
+### Internationalization (i18n)
+
+#### Translation Keys
+- Use namespaced keys: `form.fieldName`, `validation.ruleName`, `a11y.actionName`, `title.*`, `button.*`, etc.
+- Admin-dashboard locale files: `button.en.ts`, `content.en.ts`, `error.en.ts`, `form.en.ts`, `sidebar.en.ts`, `success.en.ts`, `table.en.ts`, `title.en.ts`
+- Always use `useI18n()` composable: `const { t } = useI18n()`
+- Store translations in `src/locale/{platform}/` directories
+- Use `getLocalizedValue()` utility for bilingual content (English/Arabic)
+- **CRITICAL**: When adding new translation keys in components, you MUST immediately add the corresponding translations to the appropriate locale files:
+  - Content keys → `src/locale/{platform}/content.en.ts`
+  - Button keys → `src/locale/{platform}/button.en.ts`
+  - Form keys → `src/locale/{platform}/form.en.ts`
+  - Error keys → `src/locale/{platform}/error.en.ts`
+  - Title keys → `src/locale/{platform}/title.en.ts`
+  - Add translations in alphabetical order within the file
+  - If Arabic translations exist, add them to corresponding `.ar.ts` files as well
+- **CRITICAL - Duplicate Prevention**: Before adding a new translation key, ALWAYS check if the key already exists in the target locale file. Use `grep` or search the file to verify the key doesn't already exist. Never add duplicate translation keys.
+
+### File Organization
+
+#### Views
+- Organize views by platform: `src/views/{platform}/`
+- Group related components in subdirectories
+- Use composables for view logic: `src/views/{platform}/{feature}/composables/`
+- Keep components close to views: `src/views/{platform}/{feature}/components/`
+
+#### View Feature Patterns
+- **List pages**: `{feature}/list/` with `{Feature}List.vue`, `components/`, `composables/useList.ts`
+- **Create pages**: `{feature}/create/` with `Create{Feature}.vue`, `components/`, `composables/`
+- **Update pages**: `{feature}/update/` with `Update{Feature}.vue`, `components/`, `composables/`
+- **Wizard flows** (multi-step forms): `{feature}/wizard/` with `{Feature}Wizard.vue`, `components/`, `composables/use{Feature}Wizard.ts`
+- **Settings CRUD**: `settings/{resource}/` with `{Resource}List.vue`, Create/Edit/Delete popups in `components/`
+
+#### Imports
+- Use `@/` alias for `src/` directory
+- Group imports: Vue imports, then composables, then stores, then types, then utils
+- Use type imports: `import type { ... }`
+- **Auto-imported** (do NOT import): `ref`, `computed`, `watch`, `onMounted`, etc. from Vue; `useRouter`, `useRoute` from Vue Router; `storeToRefs` from Pinia; `useI18n` from vue-i18n. Configured via `unplugin-auto-import` in vite.config.ts.
+- **CRITICAL - Component Imports:**
+  - **DO NOT import** components from `src/components/` directory (including subdirectories like `base/`, `icon/`, `popup/`). These components are auto-imported via `unplugin-vue-components` configured in `vite.config.ts`. Simply use the component name directly in templates without explicit imports.
+  - **DO import** local/feature-specific components from `src/views/{platform}/{feature}/components/` directories. These are NOT auto-imported and require explicit imports.
+  - Example:
+    ```typescript
+    // ✅ CORRECT: Import local component
+    import VehicleTypeCard from './VehicleTypeCard.vue'
+    
+    // ❌ WRONG: Don't import global components
+    // import BaseRadio from '@/components/base/BaseRadio.vue'
+    // import IconPlus from '@/components/icon/IconPlus.vue'
+    ```
+
+### Code Quality Rules
+
+#### ESLint Rules (Enforced)
+- No empty blocks (except catch with `allowEmptyCatch: true`)
+- No debugger statements
+- Console allowed only for `info`, `warn`, `error`
+- Blank line before return statements
+- Vue script blocks must use `lang="ts"`
+- Functions must use camelCase
+- Tailwind class ordering and consistency rules
+
+#### TypeScript
+- Use strict TypeScript configuration
+- Always type function parameters and return types
+- Use `unknown` over `any` when type is truly unknown
+- Prefer interfaces for object shapes
+
+#### Best Practices
+- Always handle async operations with proper error handling
+- Use `ref` for reactive primitives, `reactive` for objects (prefer `ref`)
+- Use `computed` for derived state
+- Use `watch` and `watchEffect` appropriately
+- Clean up side effects in `onUnmounted` when needed
+- Use `onMounted` for initialization logic
+
+### Common Commands & Workflows
+
+#### Development
+- `npm run dev` - Run all dashboards in parallel
+- `npm run dev:admin` - Run admin dashboard only
+- `npm run dev:app` - Run app dashboard only
+- `npm run dev:company` - Run company dashboard only
+- `npm run lint` - Lint and fix code (ESLint)
+- `npm run type-check` - Type check TypeScript
+
+#### Build
+- `npm run build` - Runs lint, then builds all three platforms
+- Build output directories: `dist/admin-dashboard`, `dist/app-dashboard`, `dist/company-dashboard`
+
+#### Git Hooks (Husky)
+- `commit-msg`: Commitlint validates conventional commit format
+- Run `npm run prepare` to install Husky hooks
+
+#### Creating New Features
+
+1. **New Form/Page:**
+   - Create view component in appropriate platform directory
+   - Create composable for form logic (validation, initial values, fields schema)
+   - Create/use store for API calls
+   - Define request/response types with adapters
+   - Use `BaseForm` with schema-driven approach
+
+2. **New Store:**
+   - Create store in `src/stores/{platform}/`
+   - Define request/response types with adapters
+   - Use `api` utility for all API calls
+   - Export reactive state and methods
+
+3. **New Component:**
+   - Create in appropriate directory (`components/base/`, `components/icon/`, or view-specific)
+   - Use `<script setup lang="ts">`
+   - Type all props and emits
+   - Use Tailwind for styling
+
+4. **New Composable:**
+   - Create in `src/composables/` or `src/composables/{platform}/`
+   - Use `use` prefix
+   - Return object with all needed values/functions
+   - Call `useVeeValidate()` if working with forms
+
+### Commit Conventions
+
+- Use **Conventional Commits** (enforced by Commitlint + Husky)
+- Format: `<type>: <subject>`
+- Allowed types: `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`
+- Examples: `feat: add company creation form`, `fix: resolve login redirect issue`
+
+### Key Utilities Reference
+
+- `getLocalizedValue(enValue, arValue)` - From `@/utils/i18n.ts`, returns value based on current locale (ar/en)
+- `Platform` enum and `isPlatform()` - From `@/types/platform` for platform detection
+- `Pagination` / `ApiPagination` / `apiPaginationAdapter` - From `@/types/response/pagination`
+
+### Platform-Specific Considerations
+
+#### Multi-Dashboard Architecture
+- Code should be organized by platform when platform-specific
+- Use `import.meta.env.MODE` to determine current platform
+- Platform enum: `Platform.ADMIN_DASHBOARD`, `Platform.APP_DASHBOARD`, `Platform.COMPANY_DASHBOARD`
+- Routes are loaded dynamically via `routesResolver.ts` based on MODE (only one platform's routes per build)
+- API interceptors are platform-specific in `src/utils/api/interceptors/`
+- Environment: `VITE_API_BASE_URL` for API base URL
+
+### Error Handling
+
+#### API Errors
+- API utility returns `{ success, message, data, errors }`
+- Always check `success` before using `data`
+- Handle `errors` object for field-level validation errors
+- Use error popups for user-facing errors
+
+#### Form Validation
+- Use Yup schemas for client-side validation
+- Display server-side errors via `errors` prop on `BaseForm`
+- Use error classes: `text-error-600` for error text
+
+### Testing Considerations
+
+- Write composables to be easily testable
+- Keep business logic in composables, not components
+- Use stores for API interactions (easier to mock)
+
+### Breadcrumb Usage
+
+- Use `BaseBreadcrumb` component with `breadcrumbItems` array for page navigation context
+- Typically placed at top of list/detail pages
+- Define breadcrumb items in composable or component
+
+### API Request/Response Adapters
+
+- `requestAdapter` signature: `(data, headers: AxiosHeaders) => data`
+- `responseAdapter` signature: `(data) => transformedData`
+- API returns `{ success, message, data, errors }` - always check `success` before using `data`
+
+## Code Review Checklist
+
+When reviewing or writing code, ensure:
+- [ ] TypeScript types are properly defined
+- [ ] Request/response adapters are used
+- [ ] ESLint rules are followed
+- [ ] Tailwind classes are properly ordered
+- [ ] i18n keys are used for user-facing text (and added to locale files)
+- [ ] Components use `<script setup lang="ts">`
+- [ ] Props and emits are typed with TypeScript generics
+- [ ] Composables follow the established pattern
+- [ ] Stores use the `api` utility with adapters
+- [ ] Form validation uses Yup schemas
+- [ ] Error handling is implemented
+- [ ] Code is organized in appropriate directories
+- [ ] Route meta includes permission and module for protected routes
+- [ ] Popups use `defineModel` for v-model binding
+- [ ] List pages use `usePagination` and `useLoading` composables
+

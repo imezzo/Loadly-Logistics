@@ -1,0 +1,11 @@
+# Override file for local development
+# This file is automatically loaded by docker-compose
+# You can customize settings here without modifying docker-compose.yml
+
+version: '3.8'
+
+services:
+  api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+

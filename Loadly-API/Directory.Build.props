@@ -1,0 +1,23 @@
+<Project>
+
+  <!--
+    Repo-wide analyzer configuration.
+    Applies to all four projects: API, Domain, Infrastructure, Shared.
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <!-- Ban APIs that depend on server-local time. See BannedSymbols.txt at repo root. -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
+
+  <!-- Make the banned-symbol rule an ERROR, not a warning. -->
+  <PropertyGroup>
+    <WarningsAsErrors>$(WarningsAsErrors);RS0030</WarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

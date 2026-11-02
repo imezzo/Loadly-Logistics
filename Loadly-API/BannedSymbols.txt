@@ -1,0 +1,17 @@
+; Banned APIs that silently depend on the server's local time zone.
+;
+; Format: <kind>:<symbol>;<message>
+;   P: = property, M: = method, T: = type. See:
+;   https://github.com/dotnet/roslyn-analyzers/blob/main/src/Microsoft.CodeAnalysis.BannedApiAnalyzers/BannedApiAnalyzers.Help.md
+;
+; If you are certain you need local time, suppress with:
+;   #pragma warning disable RS0030 // <reason>
+;   ... code ...
+;   #pragma warning restore RS0030
+;
+; Otherwise: use TimeProvider + LoadlyAggregator.Shared.Time.AppUtcTime (UTC instants
+; and UTC calendar-day midnight), not server-local DateTime.Now/Today.
+
+P:System.DateTime.Now;Use DateTime.UtcNow. Server-local time causes TZ-dependent bugs.
+P:System.DateTime.Today;Use DateTime.UtcNow.Date. Server-local time causes TZ-dependent bugs.
+P:System.DateTimeOffset.Now;Use DateTimeOffset.UtcNow. Server-local time causes TZ-dependent bugs.

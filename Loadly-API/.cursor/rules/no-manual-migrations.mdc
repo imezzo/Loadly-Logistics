@@ -1,0 +1,34 @@
+---
+description: AI agents must never create or edit EF Core migration files directly — always use the dotnet ef CLI
+alwaysApply: true
+---
+
+# EF Core Migrations — CLI only, no hand-written files
+
+Migration files under `LoadlyAggregator.Infrastructure/Migrations/` are owned by the EF Core tooling. The agent must not fabricate them with file-writing tools.
+
+## Hard rules for the agent
+
+- ❌ Do NOT use `Write`, `StrReplace`, `edit_file`, or any text tool to create or modify files like `*_CreateXTable.cs`, `*.Designer.cs`, or `ApplicationDbContextModelSnapshot.cs`.
+- ❌ Do NOT hand-write a migration from scratch, even if asked to "just add it quickly" or "mirror this other migration".
+- ❌ Do NOT delete migration files to "undo" one. Use `dotnet ef migrations remove` so the snapshot stays in sync.
+
+## Correct workflow
+
+1. Change the entity + its EF configuration under `Infrastructure/Data/Configurations/…`.
+2. Generate the migration from the solution root:
+
+   ```bash
+   dotnet ef migrations add <PascalCaseDescription> \
+     -p LoadlyAggregator.Infrastructure \
+     -s LoadlyAggregator.API
+   ```
+
+3. Read the generated `Up`/`Down`, Designer, and snapshot update, surface them to the user, and commit all three together.
+4. Apply with `dotnet ef database update -p LoadlyAggregator.Infrastructure -s LoadlyAggregator.API` only when the user asks.
+
+## When the CLI can't run
+
+If `dotnet ef` is unavailable, fails, or is blocked (sandbox, missing tool, offline), **stop and tell the user**. Do not substitute by writing the migration manually. Ask them to run the command locally and paste back the generated files, or request the permissions needed to run it.
+
+See `ef-migrations` for the full workflow, naming (`yyyyMMddHHmmss_PascalCase`), snake_case schema conventions, and anti-patterns.

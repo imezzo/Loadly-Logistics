@@ -1,0 +1,18 @@
+.tab-item {
+  @apply flex shrink-0 items-center gap-2 border-b p-2 text-sm font-medium transition-colors
+  hover:text-primary border-transparent text-neutral-600;
+
+  &.active {
+    @apply border-primary text-primary;
+  }
+}
+
+.tab-primary-outline {
+  @apply rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors
+  border-neutral-300 bg-white text-content-secondary
+  hover:border-neutral-50 hover:text-neutral-50 flex items-center gap-2;
+
+  &.active {
+    @apply border-primary bg-white text-primary;
+  }
+}

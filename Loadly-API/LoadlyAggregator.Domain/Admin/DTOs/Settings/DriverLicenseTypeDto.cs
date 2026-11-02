@@ -1,0 +1,13 @@
+using LoadlyAggregator.Domain.Common.Enums;
+namespace LoadlyAggregator.Domain.Admin.DTOs.Settings;
+
+public class DriverLicenseTypeDto
+{
+    public long Id { get; set; }
+    public string NameEn { get; set; } = string.Empty;
+    public string NameAr { get; set; } = string.Empty;
+    public long? AddedBy { get; set; }
+    public UserStatus Status { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}

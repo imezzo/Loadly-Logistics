@@ -1,0 +1,22 @@
+[
+  { "NameEn": "Red", "NameAr": "أحمر", "ColorHash": "#FF0000" },
+  { "NameEn": "Blue", "NameAr": "أزرق", "ColorHash": "#0000FF" },
+  { "NameEn": "Green", "NameAr": "أخضر", "ColorHash": "#008000" },
+  { "NameEn": "Yellow", "NameAr": "أصفر", "ColorHash": "#FFFF00" },
+  { "NameEn": "Orange", "NameAr": "برتقالي", "ColorHash": "#FFA500" },
+  { "NameEn": "Purple", "NameAr": "بنفسجي", "ColorHash": "#800080" },
+  { "NameEn": "Pink", "NameAr": "وردي", "ColorHash": "#FFC0CB" },
+  { "NameEn": "Black", "NameAr": "أسود", "ColorHash": "#000000" },
+  { "NameEn": "White", "NameAr": "أبيض", "ColorHash": "#FFFFFF" },
+  { "NameEn": "Gray", "NameAr": "رمادي", "ColorHash": "#808080" },
+  { "NameEn": "Brown", "NameAr": "بني", "ColorHash": "#A52A2A" },
+  { "NameEn": "Cyan", "NameAr": "سماوي", "ColorHash": "#00FFFF" },
+  { "NameEn": "Magenta", "NameAr": "أرجواني", "ColorHash": "#FF00FF" },
+  { "NameEn": "Silver", "NameAr": "فضي", "ColorHash": "#C0C0C0" },
+  { "NameEn": "Gold", "NameAr": "ذهبي", "ColorHash": "#FFD700" },
+  { "NameEn": "Navy", "NameAr": "كحلي", "ColorHash": "#000080" },
+  { "NameEn": "Maroon", "NameAr": "كستنائي", "ColorHash": "#800000" },
+  { "NameEn": "Olive", "NameAr": "زيتوني", "ColorHash": "#808000" },
+  { "NameEn": "Lime", "NameAr": "ليموني", "ColorHash": "#00FF00" },
+  { "NameEn": "Teal", "NameAr": "تركوازي", "ColorHash": "#008080" }
+]

@@ -1,0 +1,40 @@
+---
+description: i18n — every user-facing string is a dotted key present in BOTH Messages.en.json and Messages.ar.json
+globs: LoadlyAggregator.Shared/Resources/Messages.*.json,LoadlyAggregator.API/**/*.cs,LoadlyAggregator.Domain/**/*.cs
+alwaysApply: false
+---
+
+# Localization
+
+The project is bilingual. Every string that could reach the client — controller success messages, validator messages, exception messages — is a **dotted lowercase key**, not an English literal.
+
+## Rules
+
+- Namespace keys by feature: `admins.created_successfully`, `invoices.not_found_with_id`, `validation.required`, `auth.phone_already_taken`.
+- Whenever you add a new key, add it to **both** files in the same PR:
+  - `LoadlyAggregator.Shared/Resources/Messages.en.json`
+  - `LoadlyAggregator.Shared/Resources/Messages.ar.json`
+- Keep the two files structurally identical: same nested object layout, same key order where feasible.
+- Pass positional args with `|`-separated placeholders. The value in the JSON uses `{0}`, `{1}`, … e.g. `"not_found_with_id": "Admin not found with id {0}"`.
+- Lower-snake-case nested keys only — no spaces, no PascalCase.
+
+## Where keys appear
+
+```csharp
+// Controller success
+return Ok(new { message = "invoices.created_successfully" });
+
+// Validator
+RuleFor(x => x.Name).NotEmpty().WithMessage("validation.required");
+RuleFor(x => x.Payments).NotEmpty().WithMessage("validation.collection_at_least_one|Payments");
+
+// Exception
+throw new NotFoundException("admins.not_found_with_id", id);
+```
+
+## Anti-patterns
+
+- ❌ Returning `"Admin created"` or `.WithMessage("Phone is required")` — breaks Arabic clients.
+- ❌ Adding a key to only one language file.
+- ❌ Interpolating values into the key itself (`$"admins.not_found_{id}"`) — pass them as args instead.
+- ❌ Using the i18n JSON for anything other than user-facing text (no config, no enum values).
