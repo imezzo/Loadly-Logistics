@@ -61,6 +61,20 @@ run_migrations() {
     return 0
 }
 
+# Function to seed lookup + demo users (idempotent)
+run_seed() {
+    echo ""
+    echo "========================================="
+    echo "Seeding database..."
+    echo "========================================="
+    cd /app
+    if dotnet LoadlyAggregator.API.dll --seed; then
+        echo "✓ Database seed completed!"
+    else
+        echo "⚠ Database seed failed, continuing..."
+    fi
+}
+
 # Function to load permissions
 load_permissions() {
     echo ""
@@ -115,35 +129,31 @@ load_permissions() {
 }
 
 # Execute startup sequence
+# Seed must run AFTER migrations and BEFORE permissions (admin ACL assignment).
 if [ "$FAST_STARTUP" = "true" ]; then
     echo "🚀 FAST STARTUP MODE ENABLED"
-    
-    # Run migrations and permissions in parallel for maximum speed
+
     if [ "$SKIP_MIGRATION" != "true" ]; then
-        run_migrations &
-        MIGRATION_PID=$!
+        run_migrations || echo "⚠ migration step reported a failure, continuing..."
     fi
-    
-    if [ "$SKIP_PERMISSIONS" != "true" ]; then
-        load_permissions &
-        PERMISSIONS_PID=$!
-    fi
-    
-    # Wait for both to complete. Never let a background failure kill the
-    # entrypoint under `set -e` - the app must still get a chance to start.
-    if [ "$SKIP_MIGRATION" != "true" ]; then
-        wait $MIGRATION_PID || echo "⚠ migration step reported a failure, continuing..."
+
+    if [ "$SEED_DATABASE" = "true" ]; then
+        run_seed
     fi
 
     if [ "$SKIP_PERMISSIONS" != "true" ]; then
-        wait $PERMISSIONS_PID || echo "⚠ permission loading step reported a failure, continuing..."
+        load_permissions || echo "⚠ permission loading step reported a failure, continuing..."
     fi
 else
     # Standard startup - sequential execution
     if [ "$SKIP_MIGRATION" != "true" ]; then
         run_migrations || echo "⚠ migration step reported a failure, continuing..."
     fi
-    
+
+    if [ "$SEED_DATABASE" = "true" ]; then
+        run_seed
+    fi
+
     if [ "$SKIP_PERMISSIONS" != "true" ]; then
         load_permissions
     fi

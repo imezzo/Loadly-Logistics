@@ -138,22 +138,31 @@ public class PermissionLoader
     private async Task AssignPermissionsToSuperAdminAsync(List<string> permissionNames)
     {
         var superAdmin = await _context.Admins
-            .FirstOrDefaultAsync(a => a.Email == "super@sw-ag.com" ||
-                                     a.UserName == "super-admin" ||
-                                     a.Phone == "01000665931");
+            .FirstOrDefaultAsync(a => a.Email == AdminSeeder.SuperAdminEmail ||
+                                     a.UserName == AdminSeeder.SuperAdminUserName ||
+                                     a.Phone == AdminSeeder.SuperAdminPhone ||
+                                     a.Email == "super@sw-ag.com" ||
+                                     a.UserName == "super-admin");
 
         if (superAdmin == null)
         {
-            Console.WriteLine("⚠️  Super admin not found. Please seed super admin first using: dotnet run -- --seed");
+            Console.WriteLine("⚠️  Super admin not found. Please seed first (SEED_DATABASE=true or --seed).");
             return;
         }
 
-        Console.WriteLine($"\n👤 Assigning permissions to super admin: {superAdmin.UserName}");
+        var admins = await _context.Admins
+            .Where(a => a.DeletedAt == null && a.Status == UserStatus.ACTIVE)
+            .ToListAsync();
+
+        Console.WriteLine($"\n👤 Assigning permissions to {admins.Count} active admin(s)");
 
         try
         {
-            await _permissionService.GivePermissionsToAsync(superAdmin, permissionNames);
-            Console.WriteLine($"✅ Successfully assigned {permissionNames.Count} permissions to super admin\n");
+            foreach (var admin in admins)
+            {
+                await _permissionService.GivePermissionsToAsync(admin, permissionNames);
+                Console.WriteLine($"  ✅ {admin.UserName}: {permissionNames.Count} permissions");
+            }
         }
         catch (Exception ex)
         {
