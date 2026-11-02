@@ -38,17 +38,33 @@ public class S3StorageProvider : IStorageProvider
 
         var awsAccessKey = _configuration["Media:AwsS3:AccessKey"];
         var awsSecretKey = _configuration["Media:AwsS3:SecretKey"];
+        // ponytail: Railway/Tigris needs ServiceURL; real AWS keeps RegionEndpoint
+        var endpoint = _configuration["Media:AwsS3:Endpoint"];
+        var forcePathStyle = string.Equals(
+            _configuration["Media:AwsS3:ForcePathStyle"], "true", StringComparison.OrdinalIgnoreCase);
 
-        if (string.IsNullOrWhiteSpace(awsAccessKey) || string.IsNullOrWhiteSpace(awsSecretKey))
+        if (!string.IsNullOrWhiteSpace(endpoint))
         {
+            var config = new AmazonS3Config
+            {
+                ServiceURL = endpoint.TrimEnd('/'),
+                ForcePathStyle = forcePathStyle,
+                AuthenticationRegion = string.IsNullOrWhiteSpace(_region) ? "auto" : _region
+            };
 
+            _s3Client = string.IsNullOrWhiteSpace(awsAccessKey) || string.IsNullOrWhiteSpace(awsSecretKey)
+                ? new AmazonS3Client(config)
+                : new AmazonS3Client(awsAccessKey, awsSecretKey, config);
+            _logger.LogInformation("S3 client initialized with custom endpoint {Endpoint}", endpoint);
+        }
+        else if (string.IsNullOrWhiteSpace(awsAccessKey) || string.IsNullOrWhiteSpace(awsSecretKey))
+        {
             var regionEndpoint = Amazon.RegionEndpoint.GetBySystemName(_region);
             _s3Client = new AmazonS3Client(regionEndpoint);
             _logger.LogInformation("S3 client initialized using default credential chain");
         }
         else
         {
-
             var regionEndpoint = Amazon.RegionEndpoint.GetBySystemName(_region);
             _s3Client = new AmazonS3Client(awsAccessKey, awsSecretKey, regionEndpoint);
             _logger.LogInformation("S3 client initialized using explicit credentials");
